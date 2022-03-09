@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Primary Meta Tags -->
+    <title>NOVOS.gg - The ultimate Fortnite training platform</title>
+    <meta name="title" content="NOVOS.gg - The ultimate Fortnite training platform">
+    <meta name="description" content="Improve your Fortnite skills, manage your training schedule, perform better.
+    ">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://app.novos.gg/">
+    <meta property="og:title" content="NOVOS.gg - The ultimate Fortnite training platform">
+    <meta property="og:description" content="Improve your Fortnite skills, manage your training schedule, perform better.
+    ">
+    <meta property="og:image" content="https://d2u76h3ivp32kq.cloudfront.net/gyro/preview_image.jpg">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://app.novos.gg/">
+    <meta property="twitter:title" content="NOVOS.gg - The ultimate Fortnite training platform">
+    <meta property="twitter:description" content="Improve your Fortnite skills, manage your training schedule, perform better.
+    ">
+    <meta property="twitter:image" content="https://d2u76h3ivp32kq.cloudfront.net/gyro/preview_image.jpg">
+
+    <meta charset="utf-8">
+    <meta name="description" content="<%= productDescription %>">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
+
+    <link rel="preload" as="image" type="image/webp" sizes="512x512" href="icons/favicon-512x512.webp">
+    <link rel="preload" as="image" type="image/webp" sizes="96x96" href="icons/favicon-96x96.webp">
+    <link rel="preload" as="image" type="image/webp" sizes="32x32" href="icons/favicon-32x32.webp">
+    <link rel="preload" as="image" type="image/webp" sizes="16x16" href="icons/favicon-16x16.webp">
+    <link rel="icon" type="image/ico" href="favicon.ico">
+    <script async src='https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js'></script>
+    <style>
+      body {
+        background: #231538;
+        background-size: cover!important;
+        min-height: var(--app-height)!important;
+        padding: 0!important;
+        margin: 0!important;
+      }
+
+      .f-page-loader {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: #231638;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+      }
+
+      .f-page-loader img{
+        max-width: 70%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="f-page-loader">
+      <img src="NOVOS Loader.gif" />
+    </div>
+    <!-- DO NOT touch the following DIV -->
+    <div id="q-app"></div>
+    <script>
+      document.addEventListener('readystatechange', () => {
+        const app = document.querySelector('#q-app')
+        const pageLoader = document.querySelector('.f-page-loader')
+
+        let timer = setInterval(function () {
+          if (app && !app.querySelector('.q-layout')) {
+            return
+          }
+
+          clearInterval(timer)
+          if (pageLoader) {
+            pageLoader.remove()
+          }
+        }, 1500)
+      })
+    </script>
+  </body>
+</html>

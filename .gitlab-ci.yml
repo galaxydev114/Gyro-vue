@@ -1,0 +1,105 @@
+stages:
+  - build
+  - deploy
+  - other
+
+# Staging pipeline
+build_staging:
+  stage: build
+  environment: staging
+  image: node:12
+  only:
+    - staging
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - dist/
+  before_script:
+    - npm i
+  script:
+    - npm run build-staging
+
+deploy_staging:
+  stage: deploy
+  environment: staging
+  image: python:3.8
+  only:
+    - staging
+  needs: ["build_staging"]
+  dependencies:
+    - build_staging
+  before_script:
+    - pip3 install awscli --upgrade
+  script:
+    - sh ./scripts/deploy.sh staging
+  resource_group: staging
+
+# Production pipeline
+build_production:
+  stage: build
+  environment: production
+  image: node:12
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?[0-9]+[.][0-9]+[.][0-9]+?$/
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - dist/
+  before_script:
+    - npm i
+  script:
+    - npm run build-with-sourcemaps-prod
+
+deploy_production:
+  stage: deploy
+  environment: production
+  image: python:3.8
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v?[0-9]+[.][0-9]+[.][0-9]+?$/
+  needs: ["build_production"]
+  dependencies:
+    - build_production
+  before_script:
+    - pip3 install awscli --upgrade
+    - curl -sL https://sentry.io/get-cli/ | bash
+  script:
+    - bash ./scripts/deploy-with-sentry.sh prod
+  resource_group: production
+
+# Other pipelines
+build_storybook:
+  stage: other
+  environment: staging
+  image: node:12
+  when: manual
+  only:
+    - staging
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - storybook-static/
+  before_script:
+    - npm i
+  script:
+    - npm run build-storybook
+
+deploy_storybook:
+  stage: other
+  environment: staging
+  image: python:3.8
+  only:
+    - staging
+  needs:
+    - build_storybook
+  dependencies:
+    - build_storybook
+  before_script:
+    - pip3 install awscli --upgrade
+  script:
+    - bash ./scripts/deploy_storybook.sh

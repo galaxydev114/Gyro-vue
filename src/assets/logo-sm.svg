@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="28px" viewBox="0 0 25 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>logo-sm</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="63.3230683%" y1="-25.7087143%" x2="58.6846269%" y2="103.027857%" id="linearGradient-1">
+            <stop stop-color="#DD265C" offset="0%"></stop>
+            <stop stop-color="#99277D" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="logo-sm" fill="url(#linearGradient-1)">
+            <path d="M0,0.717361 L0.040175,26.5424 C0.040175,26.9409 0.40175,27.2996 0.803499,27.2996 L5.58432,27.2996 C6.02625,27.2996 6.34764,26.9409 6.34764,26.5424 L6.34764,13.5046 L22.0159,27.2597 C22.3373,27.5785 22.6185,27.6981 23.0203,27.6981 L23.422,27.6981 C23.8238,27.6981 24.1853,27.459 24.1853,26.9807 L24.1853,7.29744 C24.1853,6.8989 23.8238,6.54022 23.422,6.54022 L18.601,6.54022 C18.1591,6.54022 17.8377,6.8989 17.8377,7.29744 L17.8377,14.6846 L2.37032,0.597801 C2.04892,0.278974 1.7677,0 1.36595,0 L0.763324,0 C0.361575,0 0,0.318827 0,0.717361 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>

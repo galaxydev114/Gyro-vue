@@ -1,0 +1,21 @@
+<svg width="154" height="151" viewBox="0 0 154 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d)">
+<ellipse cx="77" cy="55.5" rx="37" ry="35.5" fill="url(#paint0_linear)"/>
+</g>
+<path d="M86.3333 40H67.6667C63.9906 40 61 42.8971 61 46.4583C61 49.6881 63.4626 52.3639 66.6628 52.8353C67.4326 55.8185 69.5394 58.2861 72.3333 59.6109V63.6303C70.3812 64.3988 69 66.2531 69 68.4167V69.7083C69 70.4213 69.5973 71 70.3333 71H83.6667C84.4027 71 85 70.4213 85 69.7083V68.4167C85 66.2531 83.6188 64.3988 81.6667 63.6303V59.6109C84.4606 58.2861 86.5674 55.8185 87.3372 52.8353C90.5374 52.3639 93 49.6881 93 46.4583C93 42.8971 90.0094 40 86.3333 40ZM63.6667 46.4583C63.6667 44.7747 64.7819 43.3427 66.3333 42.8094V50.1072C64.7819 49.574 63.6667 48.142 63.6667 46.4583ZM71.6667 68.4167C71.6667 66.9919 72.8626 65.8333 74.3333 65.8333H79.6667C81.1374 65.8333 82.3333 66.9919 82.3333 68.4167H71.6667ZM79 63.25H75V60.4781C75.6488 60.5982 76.3161 60.6667 77 60.6667C77.6839 60.6667 78.3512 60.5982 79 60.4781V63.25ZM77 58.0833C72.5885 58.0833 69 54.6069 69 50.3333V42.5833H85V50.3333C85 54.6069 81.4115 58.0833 77 58.0833ZM87.6667 50.1072V42.8094C89.2181 43.3427 90.3333 44.7747 90.3333 46.4583C90.3333 48.142 89.2181 49.574 87.6667 50.1072Z" fill="white"/>
+<defs>
+<filter id="filter0_d" x="0" y="0" width="154" height="151" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feOffset dy="20"/>
+<feGaussianBlur stdDeviation="20"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.866667 0 0 0 0 0.14902 0 0 0 0 0.784918 0 0 0 0.3 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+</filter>
+<linearGradient id="paint0_linear" x1="46.7287" y1="35.8849" x2="77.7785" y2="95.0554" gradientUnits="userSpaceOnUse">
+<stop stop-color="#D92779"/>
+<stop offset="1" stop-color="#7C277E"/>
+</linearGradient>
+</defs>
+</svg>

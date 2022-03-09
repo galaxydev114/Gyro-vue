@@ -1,0 +1,34 @@
+.ribbon {
+  /* adjust the below to control the shape */
+  --d: 8px;
+  --g: 19px;
+  /**/
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(29.29%, -100%) rotate(45deg); /* 29.29% = 100%*(1 - cos(45deg)) */
+  color: #fff;
+  text-align: center;
+  width: 100px;
+  transform-origin: bottom left;
+  padding: 2px 0 calc(var(--d) + 2px);
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background:
+    linear-gradient(135deg, transparent var(--g), $pink calc(var(--g) - 0.3px)) left,
+    linear-gradient(-135deg,transparent var(--g), $pink calc(var(--g) - 0.3px)) right;
+  background-size:51% 100%;
+  background-repeat:no-repeat;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, calc(100% - var(--d)) calc(100% - var(--d)), var(--d) calc(100% - var(--d)), 0 100%);
+  z-index: 99;
+}
+
+.ribbon--top-left {
+  left: 0;
+  right: auto;
+  transform: translate(-29.29%, -100%) rotate(-45deg);
+  transform-origin: bottom right;
+  z-index: 10;
+}
