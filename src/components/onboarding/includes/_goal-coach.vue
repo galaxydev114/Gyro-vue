@@ -4,7 +4,7 @@
       Listen to what our <span class="text-pink">coach has to say</span>
     </div>
     <div class="block q-mt-md q-mb-xl">
-      <n-multimedia v-if="videoUrl" :src="videoUrl"
+      <n-multimedia v-if="computedVideoUrl" :src="computedVideoUrl"
         autoplay
         @play="trackAction('Manage expectations: How we will do it: Video: click play')"
         @pause="trackAction('Manage expectations: How we will do it: Video: click pause')"
@@ -71,13 +71,22 @@
 </template>
 
 <script>
-import { GOAL_SETTING_INTRO_VIDEO } from '@/constants/helpers'
+import { GOAL_SETTING_INTRO_VIDEO_NEW, GOAL_SETTING_INTRO_VIDEO_OLD } from '@/constants/helpers'
+import { mapGetters } from 'vuex'
 
 export default {
   props: {
     videoUrl: {
       type: String,
-      default: GOAL_SETTING_INTRO_VIDEO
+      default: GOAL_SETTING_INTRO_VIDEO_OLD
+    }
+  },
+  computed: {
+    ...mapGetters({
+      experimentisNewOnboardingVideo: 'experiments/isNewOnboardingVideo'
+    }),
+    computedVideoUrl () {
+      return this.experimentisNewOnboardingVideo ? GOAL_SETTING_INTRO_VIDEO_NEW : GOAL_SETTING_INTRO_VIDEO_OLD
     }
   },
   components: {

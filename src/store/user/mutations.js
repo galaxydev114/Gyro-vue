@@ -77,3 +77,15 @@ export const setUserActivitiesStats = (state, activitiesStats = {}) => {
 export const setTrainingPlansAmount = (state, amount) => {
   state.trainingPlansAmount = amount
 }
+
+export const setDiscordData = (state, data) => {
+  state.discordData = data
+}
+
+export const setUserFriendGroupApplication = (state, value) => {
+  state.userFriendGroupApplication = value
+}
+
+export const setUserFriendGroup = (state, value) => {
+  state.userFriendGroup = value
+}

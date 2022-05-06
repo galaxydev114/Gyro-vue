@@ -1,8 +1,17 @@
 <template>
-  <article class="full-height">
-    <div class="fit dashboard-content">
+  <article class="full-height overflow-auto custom-scroll">
+
+    <div class="banner-container" v-if="showCoursesProgress && courseSummary">
+      <c-course-progress-banner :data="courseSummary"
+                                :minimized="true"
+                                @start="handleCourseStart"
+                                @close="showCoursesProgress = false"/>
+    </div>
+
+    <div class="dashboard-content">
+
       <c-season-7-ntf v-if="showSeason7Ntf" @update="updateSeason7Ntf" @hide="hideSeason7Ntf"/>
-      <div class="row gt-sm q-mb-sm q-pl-md">
+      <div class="row gt-sm q-mb-sm">
         <div class="col-6 row">
           <div class="q-mr-md text-h2 text-weight-bold">
             Weekly Training PLAN
@@ -34,7 +43,6 @@
       </div>
 
       <n-training-plan-tags :nextTournament="nextTournament" :list="tagList"/>
-
       <c-weekly-plan
         :isBuildingLoader="isBuildingLoader"
         :startDate="startDate ? startDate : 'null'"
@@ -50,48 +58,50 @@
         @add="markActivityToAdd"
         @remove="markActivityToRemove"
         @commit-move="moveActivityAcrossSections"
+        @subscribed-to-fg-event="onFGEventSubscribe"
       />
+    </div>
 
-      <c-confirm-merge-modal
-        :visible="!!showConfirmMergeTimeSections"
-        @confirm="confirmMerge"
-        @cancel="cancelMerge"
-      />
-      <c-congrats-all :visible="showCongratsAllModal"
-                      @close="showCongratsAllModal = false"/>
+    <c-confirm-merge-modal
+      :visible="!!showConfirmMergeTimeSections"
+      @confirm="confirmMerge"
+      @cancel="cancelMerge"
+    />
+    <c-congrats-all :visible="showCongratsAllModal"
+                    @close="showCongratsAllModal = false"/>
 
-      <c-modal-phase
-        v-if="phaseModal"
-        :visible="!!phaseModal"
-        :title="phaseModal.title"
-        :description="phaseModal.description"
-        :video-url="phaseModal.videoUrl"
-        @close="closePhaseModal"
-        @play-video="trackClickOnPhaseModalVideo"
-        @finish-watch-video="trackAction('Tournaments: Tournament video modal: watched entire video')"
-      >
-        <div class="row justify-around q-mt-md q-col-gutter-md">
+    <c-modal-phase
+      v-if="phaseModal"
+      :visible="!!phaseModal"
+      :title="phaseModal.title"
+      :description="phaseModal.description"
+      :video-url="phaseModal.videoUrl"
+      @close="closePhaseModal"
+      @play-video="trackClickOnPhaseModalVideo"
+      @finish-watch-video="trackAction('Tournaments: Tournament video modal: watched entire video')"
+    >
+      <div class="row justify-around q-mt-md q-col-gutter-md">
         <c-btn class="col-xs-12 col-sm-6" style="max-width: 60%;"
-          outline
-          :bold="false"
-          @click="trackAction('Tournaments: Tournament video modal: click add more tournaments'); $router.push({ name: 'Tournaments' })"
+               outline
+               :bold="false"
+               @click="trackAction('Tournaments: Tournament video modal: click add more tournaments'); $router.push({ name: 'Tournaments' })"
         >
           Add more tournaments
         </c-btn>
         <c-btn class="col-xs-12 col-sm-6" style="max-width: 60%;"
-          :bold="false"
-          @click="trackAction('Tournaments: Tournament video modal: click start training'); closePhaseModal()"
+               :bold="false"
+               @click="trackAction('Tournaments: Tournament video modal: click start training'); closePhaseModal()"
         >
           Start training
         </c-btn>
-        </div>
-      </c-modal-phase>
-      <modal-tournaments-preparations-removed
-        :tournaments="rescheduledTournaments" :visible="showTournamentRemovedModal"
-        @close="trackAction('Tournaments: Rescheduled modal: close'); confirmRemoveTournaments(false)"
-        @confirm="trackAction('Tournaments: Rescheduled modal: click add new'); confirmRemoveTournaments(true)"
-      />
-    </div>
+      </div>
+    </c-modal-phase>
+    <modal-tournaments-preparations-removed
+      :tournaments="rescheduledTournaments" :visible="showTournamentRemovedModal"
+      @close="trackAction('Tournaments: Rescheduled modal: close'); confirmRemoveTournaments(false)"
+      @confirm="trackAction('Tournaments: Rescheduled modal: click add new'); confirmRemoveTournaments(true)"
+    />
+    <modal-fg-sent-discord :discordLink="fgSentModalData && fgSentModalData.discordEventUrl" :visible="Boolean(fgSentModalData)" @done="fgSentModalData = null" @close="fgSentModalData = null"/>
   </article>
 </template>
 
@@ -113,7 +123,9 @@ export default {
     'c-modal-phase': () => import('@/components/dashboard/modal/modal-intro-video'),
     'n-training-plan-tags': () => import('@/components/training-plan-tags'),
     'c-season-7-ntf': () => import('@/components/notifications/season-7'),
-    'modal-tournaments-preparations-removed': () => import('@/components/tournaments/modal/modal-tournaments-preparations-removed')
+    'modal-tournaments-preparations-removed': () => import('@/components/tournaments/modal/modal-tournaments-preparations-removed'),
+    'c-course-progress-banner': () => import('@/components/courses/banner-progress'),
+    'modal-fg-sent-discord': () => import('@/components/friend-group/modal/modal-sent-discord')
   },
   mixins: [paymentMixin],
   filters: {
@@ -137,12 +149,14 @@ export default {
       isBuildingLoader: false,
       dayView: false,
       isHideSeason7Ntf: true,
-      showTournamentRemovedModal: false
+      showTournamentRemovedModal: false,
+      showCoursesProgress: true,
+      fgSentModalData: null
     }
   },
   async created () {
     this.isHideSeason7Ntf = localStorage.getItem('isHideSeason7Ntf')
-    this.updateDayView(localStorage.getItem('dayViewStatus') ? localStorage.getItem('dayViewStatus') === 'true' : !this.experimentIsFirstBoardViewExperiment, true)
+    this.updateDayView(this.$q.platform.is.mobile ? false : localStorage.getItem('dayViewStatus') && localStorage.getItem('dayViewStatus') === 'true', true)
 
     if ('generate' in this.$route.query) {
       this.isBuildingLoader = true
@@ -182,12 +196,20 @@ export default {
         await this.generateUserTrainingPlan()
         await this.getUserCurrentTrainingPlan()
       }
-      await this.getTournaments()
-      await this.getUserTournaments({ userId: this.currentUser.id })
+      await Promise.allSettled([
+        this.getUserFriendGroupEvents(),
+        this.getTournaments(),
+        this.getUserTournaments({ userId: this.currentUser.id }),
+        this.getCurrentUserScore()])
+
+      if (this.experimentCourses) {
+        await this.getUserCourses()
+      }
+
       this.isPageReady = true
-      await this.getCurrentUserScore()
       this.trackLastLoggedIn()
     }
+
     this.$emit('loaded', 'TrainingPlan')
   },
 
@@ -235,7 +257,8 @@ export default {
       currentUserScore: 'user/currentUserScore',
       showFinishedAllDailyRoutineModal: 'trainingPlan/showFinishedAllDailyRoutineModal',
       showPaywall: 'payments/showPaywall',
-      experimentIsFirstBoardViewExperiment: 'experiments/experimentIsFirstBoardViewExperiment'
+      experimentCourses: 'experiments/experimentCourses',
+      userFriendGroupEvents: 'trainingPlan/userFriendGroupEvents'
     }),
 
     ...mapState({
@@ -243,7 +266,8 @@ export default {
       trainingPlanUpdatedAt: state => state.trainingPlan.updatedAt,
       user: state => state.user.currentUser,
       userTournaments: state => state.tournaments.userTournaments,
-      trainingPlansAmount: state => state.user.trainingPlansAmount
+      trainingPlansAmount: state => state.user.trainingPlansAmount,
+      courses: state => state.courses.courses
     }),
 
     shouldShowQuestanereModal () {
@@ -266,8 +290,12 @@ export default {
       if (this.isBuildingLoader) return []
       const data = []
       // TODO: get this from server, stored in TP? We have Schedule object also
-      const eventDayNumbersObject = this.tournaments.map(t => { return { eventDayNumber: t.dayNumber - 1, t } })
-      const prepDayNumbers = eventDayNumbersObject.map(dObj => { return { eventDayNumber: dObj.eventDayNumber - 1, t: dObj.t } })
+      const eventDayNumbersObject = this.tournaments.map(t => {
+        return { eventDayNumber: t.dayNumber - 1, t }
+      })
+      const prepDayNumbers = eventDayNumbersObject.map(dObj => {
+        return { eventDayNumber: dObj.eventDayNumber - 1, t: dObj.t }
+      })
       for (let day = 0; day < 7; day++) {
         const dailyTournament = eventDayNumbersObject.filter(dayNumberObject => dayNumberObject.eventDayNumber === day)[0]
         const dailyPrep = prepDayNumbers.filter(dayNumberObject => dayNumberObject.eventDayNumber === day)[0]
@@ -310,6 +338,25 @@ export default {
         }
       }
 
+      // Insert tournaments into the day - TODO, rethink
+      for (const event of this.friendGroupEvents) {
+        const dayIndex = event.dayNumber - 1
+        if (!(dayIndex in data)) continue
+        const eventStartHour = this.$date(event.dateTime).format('HH:mm')
+        const eventEndHour = this.$date(event.dateTime)
+          .add(parseInt(event.trainingRoutine.duration), 'minute').format('HH:mm')
+
+        if (data[dayIndex].timeSections.length === 0) {
+          data[dayIndex].timeSections[0] = {
+            start: eventStartHour,
+            end: eventEndHour,
+            items: [{ type: 'shared_event', ...event, startHour: eventStartHour, endHour: eventEndHour }]
+          }
+        } else {
+          data[dayIndex].timeSections[0].items.push({ type: 'shared_event', ...event, startHour: eventStartHour, endHour: eventEndHour })
+        }
+      }
+
       return data
     },
 
@@ -322,7 +369,7 @@ export default {
     showSeason7Ntf () {
       return !this.isHideSeason7Ntf && this.trainingPlanUpdatedAt && new Date(this.trainingPlanUpdatedAt) < new Date('2021-06-10T22:00:00.000Z')
     },
-    dayPast () {
+    dayPast  () {
       let current = this.$date().startOf('day')
       current = current.add(this.allDone ? 1 : 0, 'day')
       const start = this.$date(this.startDate).startOf('day')
@@ -333,6 +380,12 @@ export default {
       return this.userTournaments.map(tournament => {
         const dayNumber = this.$date(tournament.startAt).diff(this.$date(this.startDate).startOf('day'), 'days') + 1
         return { ...tournament, dayNumber }
+      })
+    },
+    friendGroupEvents () {
+      return this.userFriendGroupEvents.map(fge => {
+        const dayNumber = this.$date(fge.dateTime).diff(this.$date(this.startDate).startOf('day'), 'days') + 1
+        return { ...fge, dayNumber }
       })
     },
     rescheduledTournaments () {
@@ -350,7 +403,24 @@ export default {
       return minBy(this.tournaments.filter(t => (this.$date(t.startAt) > this.$date(now))), tournament => this.$date(tournament.startAt))
     },
     tagList () {
-      return this.trainingPlanFocus ? this.trainingPlanFocus.map(el => ({ category: el.category, label: `${el.category.toUpperCase()} - ${el.technique.toUpperCase()}` })) : []
+      return this.trainingPlanFocus ? this.trainingPlanFocus.map(el => ({
+        category: el.category,
+        label: `${el.category?.toUpperCase()} - ${el.technique?.toUpperCase()}`
+      })) : []
+    },
+    courseSummary () {
+      if (!this.courses[0]) {
+        return null
+      }
+      const course = this.courses[0]
+      return {
+        id: course.id,
+        imageSrc: course.coverPic,
+        title: course.title,
+        next: '', // TO-DO We don't support several courses yet
+        category: course.skills[0],
+        progress: course.progress?.length && course.progress.filter(el => el.isCompleted).length / course.progress.length
+      }
     }
   },
   methods: {
@@ -362,6 +432,7 @@ export default {
     ...mapActions({
       finishOnboarding: 'user/finishOnboarding',
       getUserCurrentTrainingPlan: 'trainingPlan/fetchUserCurrentTrainingPlan',
+      getUserFriendGroupEvents: 'trainingPlan/getUserFriendGroupEvents',
       addTimeSection: 'trainingPlan/addTimeSection',
       changeTimeSection: 'trainingPlan/changeTimeSection',
       updateActivitiesInTimeSection: 'trainingPlan/updateActivitiesInTimeSection',
@@ -373,8 +444,19 @@ export default {
       regenerateTrainingPlan: 'trainingPlan/regenerateTrainingPlan',
       getUserActivitiesStats: 'user/getUserActivitiesStats',
       getTournaments: 'tournaments/getTournaments',
-      getUserTournaments: 'tournaments/getUserTournaments'
+      getUserTournaments: 'tournaments/getUserTournaments',
+      getUserCourses: 'courses/getUserCourses'
     }),
+    onFGEventSubscribe (data) {
+      this.fgSentModalData = data
+    },
+    handleCourseStart () {
+      if (!this.checkPremiumActionRestriction('CoursesStart')) {
+        return
+      }
+      this.trackAction('TP: Click on Course Banner', { courseTitle: this.courseSummary?.title, courseId: this.courseSummary?.id })
+      this.$router.push({ name: 'Course', params: { id: this.courseSummary.id } })
+    },
     updateDayView (dayViewStatus, isLoad) {
       localStorage.setItem('dayViewStatus', !!dayViewStatus)
       this.dayView = !!dayViewStatus
@@ -402,21 +484,25 @@ export default {
       localStorage.setItem('isHideSeason7Ntf', true)
     },
 
-    selectRoutine ({ routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject }) {
+    selectRoutine ({ routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject, isShared }) {
+      // TO-DO is this used?
       this.setSelectedRoutine({
         dayNumber,
         timeSectionIdx,
         position,
         startHour: routine.startHour
       })
-
       const activityType = getActivityTypeFromCategory(routine.skill)
       if (activityType === 'knowledgetime') {
         this.$router.push({ name: 'Knowledge', params: { id: routineId } })
       } else if (activityType === 'gamesenseworkshop') {
         this.$router.push({ name: 'WorkshopTrainingPlanAll', query: { userTrainingActivityId: routineId } })
       } else {
-        this.$router.push({ name: 'RoutineDetailsNew', query: { userTrainingActivityId: routineId }, params: { id: routine.trainingRoutineId } })
+        if (isShared) {
+          this.$router.push({ name: 'FriendGroupEventRoutine', query: {}, params: { id: routine.id } })
+        } else {
+          this.$router.push({ name: 'RoutineDetailsNew', query: { userTrainingActivityId: routineId }, params: { id: routine.trainingRoutineId } })
+        }
       }
       this.trackAction('TP: Click Training Activity', {
         'user-activity': routine,
@@ -429,14 +515,14 @@ export default {
 
     // ====== TIME SECTIONS + MANAGE ACTIVITIES LOGIC ========
 
-    wouldSectionsMerge ({ addDayNumber, addTimeSectionIdx, addedDuration }) {
+    wouldSectionsMerge  ({ addDayNumber, addTimeSectionIdx, addedDuration }) {
       const thisSectionEnd = this.timeSectionsByDay[addDayNumber][addTimeSectionIdx].end ||
         this.timeSectionsByDay[addDayNumber][addTimeSectionIdx].start // for empty time sections
       const nextSectionStart = this.timeSectionsByDay[addDayNumber][addTimeSectionIdx + 1]?.start
       return nextSectionStart && !this.$dayjs.timeOfDay(nextSectionStart)
         .isAfter(this.$dayjs.timeOfDay(thisSectionEnd).add(addedDuration, 'minutes'))
     },
-    confirmMerge () {
+    confirmMerge  () {
       this.trackAction('TP: Confirm merge sections', { reason: this.showConfirmMergeTimeSections })
       switch (this.showConfirmMergeTimeSections) {
         case 'move-activity':
@@ -570,7 +656,15 @@ export default {
       this.activityToRemove = null
       this.activityToAdd = null
 
-      const activityToMove = { addDayNumber, addTimeSectionIdx, newIndex, rmDayNumber, rmTimeSectionIdx, oldIndex, activity }
+      const activityToMove = {
+        addDayNumber,
+        addTimeSectionIdx,
+        newIndex,
+        rmDayNumber,
+        rmTimeSectionIdx,
+        oldIndex,
+        activity
+      }
 
       if (this.wouldSectionsMerge({ addDayNumber, addTimeSectionIdx, addedDuration: activity.duration })) {
         this.activityToMove = activityToMove
@@ -597,7 +691,10 @@ export default {
         })
       }
 
-      this.updateActivitiesInTimeSection({ dayNumber: addDayNumber, timeSection: this.timeSectionsByDay[addDayNumber][addTimeSectionIdx] })
+      this.updateActivitiesInTimeSection({
+        dayNumber: addDayNumber,
+        timeSection: this.timeSectionsByDay[addDayNumber][addTimeSectionIdx]
+      })
 
       const dayKey1 = rmDayNumber
       const dayKey2 = addDayNumber
@@ -612,7 +709,11 @@ export default {
     },
 
     addNewRoutine ({ trainingPlanRoutine, dayNumber, timeSectionIdx }) {
-      if (this.wouldSectionsMerge({ addDayNumber: dayNumber, addTimeSectionIdx: timeSectionIdx, addedDuration: trainingPlanRoutine.duration })) {
+      if (this.wouldSectionsMerge({
+        addDayNumber: dayNumber,
+        addTimeSectionIdx: timeSectionIdx,
+        addedDuration: trainingPlanRoutine.duration
+      })) {
         this.showConfirmMergeTimeSections = 'add-activity'
         this.activityToAdd = { trainingPlanRoutine, dayNumber, timeSectionIdx }
       } else {
@@ -657,7 +758,9 @@ export default {
     },
 
     trackLastLoggedIn () {
-      if (!this.user) { return }
+      if (!this.user) {
+        return
+      }
 
       const utcOffset = (new Date().getTimezoneOffset()) * -1
       const lastLoggedIn = new Date().toISOString()
@@ -729,18 +832,42 @@ export default {
 </script>
 
 <style lang="scss">
-.dashboard-content{
-  padding: 30px 30px 0 10px;
-  display: flex;
-  flex-direction: column;
+
+.custom-scroll{
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #f9f9fd;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: $soft-tone;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: $dark-sec;
+  }
+}
+
+.banner-container{
+  padding: 30px 30px 0;
   @media (max-width: $breakpoint-sm-max) {
     padding: 0;
   }
 }
+
+.dashboard-content {
+  padding: 30px 30px 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  @media (max-width: $breakpoint-sm-max) {
+    padding: 0;
+  }
+}
+
 .title-img-bg {
   position: absolute;
   top: -50px;
 }
+
 .modal-congrats {
   padding: 30px;
 }
@@ -752,25 +879,31 @@ export default {
   top: 0;
   width: 100%;
 }
+
 .slide-enter {
   transform: translate(100%, 0);
   position: absolute;
   opacity: 0;
 }
+
 .slide-leave-to {
   transform: translate(-100%, 0);
   position: absolute;
   opacity: 0;
 }
+
 .text-opacity {
   opacity: 0.3;
 }
+
 .text-uppercase {
   text-transform: uppercase;
 }
+
 .text-size-small {
   font-size: 10px;
 }
+
 .phase-header {
   @media (max-width: $breakpoint-sm-max) {
     border-bottom: 1px solid $soft-tone;
@@ -778,26 +911,30 @@ export default {
     padding: 10px;
   }
 }
+
 .color-gray-violet {
   color: $gray-violet;
 }
 </style>
 
 <style lang="scss" scoped>
-.q-header{
+.q-header {
   border-bottom: 1px solid;
 }
-.week-progress{
+
+.week-progress {
   display: flex;
   flex-direction: row;
   align-items: center;
-  &__day{
+
+  &__day {
     width: 7px;
     height: 28px;
     border-radius: 3px;
     margin-right: 3px;
     border: 2px solid $soft-tone;
-    &--done{
+
+    &--done {
       border-color: $green;
       background: rgba(44, 173, 109, 0.4);
     }
@@ -811,14 +948,16 @@ export default {
   border-radius: 6px;
   padding: 4px 2px;
   width: auto;
-  .btn-group__item{
+
+  .btn-group__item {
     margin: 0 2px;
     height: 40px;
-    /deep/ .q-btn{
+
+    /deep/ .q-btn {
       height: 100%;
       line-height: 14px;
       @media (max-width: $breakpoint-sm-max) {
-        &__wrapper{
+        &__wrapper {
           padding: 12px 15px;
         }
       }

@@ -1,14 +1,27 @@
 <template>
-  <div class="full-height">
+  <div :class="{'full-height': $q.screen.width > 576}" ref="main">
+    <training-routine-shared
+      v-if="isSharedRoutine && routineWithSessionsData"
+      :routineId="routineWithSessionsData.id"
+      :sessionId="sessionId"
+      :isViewingSession="isViewingSession"
+      :isDiscovery="isDiscovery"
+      :isPublic="isPublic"
+      :returnRouteName="returnRouteName"
+      :currentRoutine="currentRoutine"
+      :friendGroupEventId="friendGroupEventId"
+      :routineWithSessionsData="routineWithSessionsData"
+      @loading="handleLoading"
+      @analytics="trackAction"
+      @reroute-to-session="rerouteToSession"
+      @reroute-to-overview="rerouteToOverview"
+    />
     <training-routine-measure
-      v-if="isRoutineMeasurable"
+      v-else-if="isRoutineMeasurable && routineId"
       :routineId="routineId"
       :userRoutineId="userRoutineId"
       :sessionId="sessionId"
       :isViewingSession="isViewingSession"
-      :urlForRoutineOverview="toRoutineOverview"
-      :urlForSession="toSession"
-      :analyticsContext="analyticsContext"
       :isDiscovery="isDiscovery"
       :isPublic="isPublic"
       :returnRouteName="returnRouteName"
@@ -17,16 +30,17 @@
       @loading="handleLoading"
       @completed-session-local="markSessionAsCompletedLocal"
       @completed-routine-local="markRoutineAsCompletedLocal"
+      @analytics="trackAction"
+      @reroute-to-session="rerouteToSession"
+      @reroute-to-overview="rerouteToOverview"
+      @reroute-to-new-user-routine="rerouteToRoutine"
     />
     <training-routine-standard
-      v-else
+      v-else-if="routineId"
       :routineId="routineId"
       :userRoutineId="userRoutineId"
       :sessionId="sessionId"
       :isViewingSession="isViewingSession"
-      :urlForRoutineOverview="toRoutineOverview"
-      :urlForSession="toSession"
-      :analyticsContext="analyticsContext"
       :isDiscovery="isDiscovery"
       :isPublic="isPublic"
       :returnRouteName="returnRouteName"
@@ -35,6 +49,10 @@
       @loading="handleLoading"
       @completed-session-local="markSessionAsCompletedLocal"
       @completed-routine-local="markRoutineAsCompletedLocal"
+      @analytics="trackAction"
+      @reroute-to-session="rerouteToSession"
+      @reroute-to-overview="rerouteToOverview"
+      @reroute-to-new-user-routine="rerouteToRoutine"
     />
     <page-loader v-if="routineDataLoading || internalsBusy" />
   </div>
@@ -42,19 +60,21 @@
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import * as api from '@/services/api'
+import routineDataMixin from '@/mixins/routineData.mixin'
+import segmentAnalyticsMixin from '@/mixins/segmentAnalytics.mixin'
 
 export default {
   components: {
     'page-loader': () => import('@/components/common/page-loader'),
     'training-routine-standard': () => import('./TrainingRoutineStandard.vue'),
-    'training-routine-measure': () => import('./TrainingRoutineMeasure.vue')
+    'training-routine-measure': () => import('./TrainingRoutineMeasure.vue'),
+    'training-routine-shared': () => import('./TrainingRoutineShared.vue')
   },
 
   props: {
     routineId: {
       type: String,
-      required: true
+      default: null
     },
     userRoutineId: {
       type: String,
@@ -63,12 +83,15 @@ export default {
     sessionId: {
       type: String,
       default: null
+    },
+    friendGroupEventId: {
+      type: String,
+      default: null
     }
   },
-
+  mixins: [routineDataMixin],
   data () {
     return {
-      routineWithSessionsData: null,
       routineDataLoading: null,
       internalsBusy: false
     }
@@ -77,10 +100,11 @@ export default {
     ...mapState({
       userId: state => state.user.currentUser.id
     }),
-    ...mapGetters('trainingRoutine', {
-      getTrainingRoutine: 'trainingRoutine'
+    ...mapGetters({
+      getTrainingRoutine: 'trainingRoutine/trainingRoutine',
+      getFriendGroupEvent: 'trainingPlan/getFriendGroupEvent',
+      isLoggedIn: 'user/isLoggedIn'
     }),
-    ...mapGetters({ isLoggedIn: 'user/isLoggedIn' }),
     currentRoutine () {
       return this.userRoutineId
         ? this.getTrainingRoutine(this.userRoutineId)
@@ -94,6 +118,14 @@ export default {
     },
     routeInfo () {
       switch (this.$route.name) {
+        case 'FriendGroupEventRoutine':
+        case 'FriendGroupEventSession':
+          return {
+            routineRouteName: 'FriendGroupEventRoutine',
+            sessionRouteName: 'FriendGroupEventSession',
+            analyticsContext: 'FG Event Routine: ',
+            returnTo: 'TrainingPlan'
+          }
         case 'RoutineDetailsNew':
         case 'SessionDetailsNew':
           return {
@@ -141,6 +173,9 @@ export default {
       return this.routeInfo.routineRouteName.includes('Public')
       // return !this.isLoggedIn && !this.userRoutineId
     },
+    isSharedRoutine () {
+      return this.routeInfo.routineRouteName.includes('FriendGroup')
+    },
     analyticsContext () {
       return this.routeInfo.analyticsContext
     },
@@ -152,30 +187,42 @@ export default {
     ...mapActions({
       fetchAlternativeRoutines: 'trainingRoutine/fetchAlternativeRoutines',
       fetchUserTrainingRoutineSessions: 'trainingRoutine/fetchUserTrainingRoutineSessions',
-      getRoutineUserData: 'trainingRoutine/getRoutineUserData'
+      getRoutineUserData: 'trainingRoutine/getRoutineUserData',
+      getUserFriendGroupEvents: 'trainingPlan/getUserFriendGroupEvents'
     }),
+    trackAction (event, opts) {
+      segmentAnalyticsMixin.methods.trackAction(this.analyticsContext + event, { ...opts, layout: 'v2' })
+    },
     handleLoading (loading) {
       this.internalsBusy = loading
     },
-    markSessionAsCompletedLocal (session) {
-      this.routineWithSessionsData = {
-        ...this.routineWithSessionsData,
-        sessions: this.routineWithSessionsData.sessions.map(s => {
-          return s.id === session.id
-            ? { ...s, isCompleted: true }
-            : s
-        })
+    rerouteToSession ({ sessionId }, callback) {
+      const rootId = this.isSharedRoutine ? this.friendGroupEventId : this.routineId
+      if (sessionId) {
+        this.$router.replace({ name: this.routeInfo.sessionRouteName, query: this.$route.query, params: { id: rootId, sessionId } }).then(callback)
       }
     },
-    markRoutineAsCompletedLocal () {
-      this.$set(this.routineWithSessionsData, 'sessions', this.routineWithSessionsData.sessions.map(s => {
-        return { ...s, isCompleted: true }
-      }))
+    rerouteToOverview () {
+      // TODO - not nice tactics
+      const rootId = this.isSharedRoutine ? this.friendGroupEventId : this.routineId
+      this.$router.replace({ name: this.routeInfo.sessionRouteName, query: this.$route.query, params: { id: rootId } })
+    },
+    rerouteToRoutine ({ routineId, userTrainingActivityId }) {
+      this.$router.replace({ ...this.toRoutineOverview, query: { userTrainingActivityId }, params: { id: routineId } })
     },
     async fetchData () {
       this.routineDataLoading = true
       try {
-        await this.fetchRoutine()
+        if (this.isSharedRoutine) {
+          let trainingRoutine = this.getFriendGroupEvent(this.friendGroupEventId)?.trainingRoutine
+          if (!trainingRoutine) {
+            await this.getUserFriendGroupEvents()
+            trainingRoutine = this.getFriendGroupEvent(this.friendGroupEventId)?.trainingRoutine
+          }
+          this.routineWithSessionsData = trainingRoutine
+          await this.fetchDefaultSessions(trainingRoutine.defaultSessionIds)
+        }
+        await this.fetchRoutine(this.routineId)
         if (this.isLoggedIn) {
           if (this.routineId) {
             await this.getRoutineUserData({ userId: this.userId, trainingRoutineId: this.routineId })
@@ -192,28 +239,6 @@ export default {
       }
 
       this.routineDataLoading = false
-    },
-    async fetchRoutine () {
-      if (!this.routineId) {
-        return
-      }
-
-      const response = await api.getRoutine(this.routineId)
-      if (response.status === 200) {
-        this.routineWithSessionsData = response.data.trainingRoutine
-        await this.fetchDefaultSessions(this.routineWithSessionsData.defaultSessionIds)
-      }
-    },
-    async fetchDefaultSessions (ids = []) {
-      let sessions = []
-      if (ids.length) {
-        sessions = await api.getSessions(ids, true)
-          .then(response => response.data.sessions)
-      } else {
-        sessions = [{}]
-      }
-
-      this.routineWithSessionsData = { ...this.routineWithSessionsData, sessions }
     }
   },
   created () {
@@ -225,6 +250,10 @@ export default {
       })
   },
   beforeRouteUpdate (to, from, next) {
+    const scrollEl = document.getElementsByClassName('n-dashboard__content')
+    if (scrollEl && scrollEl.length) {
+      scrollEl[0].scrollTop = 0
+    }
     if (from.params.id !== to.params.id) {
       this.fetchData()
     }

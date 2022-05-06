@@ -8,7 +8,7 @@ export const haveProgress = (state) => {
 const formatValue = x => x === null ? NaN : x
 const replaceNaNs = x => isNaN(x) ? 0 : x
 
-export const skillScoreChart = (state) => {
+export const skillScoreChart = (state, getters, rootState, rootGetters) => {
   let isUserDataPredicted = false
   let userData = state.isUserFilterEnabled
     ? Object.entries(state.userScore).map(([key, stat]) => {
@@ -36,6 +36,10 @@ export const skillScoreChart = (state) => {
   }
 
   userData.sort((a, b) => dayjs(a.x).isAfter(dayjs(b.x)) ? 1 : -1)
+
+  userData.forEach((el) => {
+    el.multicolorLineColor = el.y < 300 ? '#2f7c5b' : el.y < 1050 ? '#4fd1e3' : '#4539a5'
+  })
 
   return { userData, isUserDataPredicted }
 }

@@ -5,17 +5,14 @@
       :userRoutineId="userRoutineId"
       :sessionId="sessionId"
       :isViewingSession="isViewingSession"
-      :analyticsContext="analyticsContext"
-      :urlForRoutineOverview="urlForRoutineOverview"
-      :urlForSession="urlForSession"
       :isDiscovery="isDiscovery"
       :isPublic="isPublic"
       :isCongratsVisible="isCongratsVisible"
-      :routineWithSessionsData="routineWithSessionsData"
       :currentRoutine="currentRoutine"
       :currentSession="currentSession"
       :computedMap="computedMap"
       :animation="animation"
+      :externalCompletion="externalCompletion"
       @back="goBack"
       @click-session="clickSession"
       @overview-routine="overviewRoutine"
@@ -28,6 +25,7 @@
       @post-completion-redirect="handleCompletionRedirect"
       @analytics="trackAction"
       @join-novos-if-public="joinNovosIfPublic"
+      @new-routine-picked="handleNewRoutinePicked"
     />
   </div>
 </template>
@@ -36,7 +34,6 @@
 import { mapActions } from 'vuex'
 import paymentMixin from '@/mixins/payment.mixin'
 import trainingRoutineCommonMixin from './_TrainingRoutineCommon.mixin'
-import segmentAnalyticsMixin from '@/mixins/segmentAnalytics.mixin'
 
 export default {
   components: {
@@ -57,7 +54,7 @@ export default {
       markRoutineAsDone: 'trainingRoutine/markRoutineAsDone'
     }),
     trackAction (event, opts = {}) {
-      segmentAnalyticsMixin.methods.trackAction(this.analyticsContext + event, { ...opts, layout: 'v2' })
+      this.$emit('analytics', event, { ...opts, layout: 'v2' })
     },
     async completeSession (sessionId) {
       this.triggerLoading(true)

@@ -111,6 +111,35 @@
                     class="handle touch-only"
                     :key="item.id + '-handle'" />
                 </c-routine>
+                <c-routine v-else-if="item.type === 'shared_event'"
+                  class="q-mb-md"
+                  :shared="true"
+                  style="order: 1"
+                  :key="item.id"
+                  :participants="item.participants && item.participants.filter(el => el.isGoing)"
+                  :isGoing="item.isUserGoing"
+                  :data="{
+                    ...item.trainingRoutine,
+                    friendGroupEventId: item.id,
+                    discordEventUrl: item.discordEventUrl,
+                    startHour: item.startHour,
+                    endHour: item.endHour,
+                    totalTime: item.trainingRoutine.duration
+                  }"
+                  :minimized="dayView"
+                  @click="clickOnRoutine($event, item, position, day.dayNumber, idx, day.tournamentPrep, day.tournamentPrepObject, true)"
+                  @going="$emit('subscribed-to-fg-event', {
+                    discordEventUrl: item.discordEventUrl
+                  })"
+                  :isCurrentDay="isCurrentDay(day.dayNumber)"
+                  :isFinished="isFinished(day.dayDateString, item)"
+                >
+                  <c-icon
+                    icon="arrowsDrag"
+                    slot="handle"
+                    class="handle touch-only"
+                    :key="item.id + '-handle'" />
+                </c-routine>
                 <c-tournament v-else-if="item.type === 'tournament'"
                   class="no-drag q-mb-md"
                   style="order: 1"
@@ -500,6 +529,13 @@ export default {
       if ((this.$date(this.startDate).startOf('day').diff(this.$date().startOf('day'), 'days') > 6) || (this.$date(this.startDate).startOf('day').diff(this.$date().startOf('day'), 'days') < -6)) return false
       return (this.currentDayNumber === this.$date(this.startDate).add(offset - 1, 'days').isoWeekday())
     },
+
+    isFinished (selDate, item) {
+      const [hour, minute] = item.startHour.split(':')
+      const eventDate = dayjs(selDate).set('hour', hour).set('minute', minute).add(item.duration, 'minute')
+      return this.$date().diff(eventDate, 'hour') > 1
+    },
+
     isExtraDayActiveInternal () {
       return this.isExtraDayActive(this.startDate)
     },
@@ -568,7 +604,7 @@ export default {
       this.$emit('commit-move')
     },
 
-    clickOnRoutine (routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject) {
+    clickOnRoutine (routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject, isShared) {
       this.trackAction('TP: Click Training Routine', {
         'user-routine': routine,
         date: new Date()
@@ -578,7 +614,7 @@ export default {
         return this.setPayWallMethod('OnClick OnRoutine')
       } else {
         this.$emit('selected-routine', {
-          routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject
+          routineId, routine, position, dayNumber, timeSectionIdx, dayType, tournamentObject, isShared
         })
       }
     },
@@ -664,9 +700,8 @@ export default {
   &__week {
     position: relative;
     margin: 0;
-    padding: 10px 20px 0 40px;
-    height: 100%;
-    height: var(--app-height);
+    padding: 10px 20px 0 10px;
+    max-height: var(--app-height);
     flex-grow: 1;
     overflow: hidden;
 
@@ -675,7 +710,7 @@ export default {
     }
     @media (max-width: $breakpoint-sm-max) {
       padding: 0 20px;
-      height: calc(var(--app-height) - 60px);
+      height: calc(var(--app-height) - 50px);
     }
     @media (min-width: $breakpoint-sm-min) {
       &:after {

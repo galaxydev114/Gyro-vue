@@ -5,14 +5,10 @@
     :userRoutineId="userRoutineId"
     :sessionId="sessionId"
     :isViewingSession="isViewingSession"
-    :analyticsContext="analyticsContext"
-    :urlForRoutineOverview="urlForRoutineOverview"
-    :urlForSession="urlForSession"
     :isRoutineMeasurable="true"
     :isDiscovery="isDiscovery"
     :isPublic="isPublic"
     :isCongratsVisible="isCongratsVisible"
-    :routineWithSessionsData="routineWithSessionsData"
     :trainingSessionStats="currentSessionStats"
     :currentRoutine="currentRoutine"
     :currentSession="currentSession"
@@ -31,11 +27,13 @@
     @score-submit-request="handleScoreSubmitRequest"
     @analytics="trackAction"
     @join-novos-if-public="joinNovosIfPublic"
+    @new-routine-picked="handleNewRoutinePicked"
   />
     <n-modal-submit-score
       :key="sessionId"
       :visible="showScoreModal"
       :providedScore="currentSession && currentSession.score"
+      :isScoreTime="currentSession && currentSession.isScoreTime"
       @close="showScoreModal = false"
       @skip="skipEnterScore()"
       @score="enteredScore"
@@ -50,7 +48,6 @@
 import { mapActions, mapGetters } from 'vuex'
 import paymentMixin from '@/mixins/payment.mixin'
 import trainingRoutineCommonMixin from './_TrainingRoutineCommon.mixin'
-import segmentAnalyticsMixin from '@/mixins/segmentAnalytics.mixin'
 
 export default {
   components: {
@@ -83,17 +80,16 @@ export default {
       markSessionAsCompleted: 'trainingRoutine/markSessionAsDone'
     }),
     trackAction (event, opts = {}) {
-      segmentAnalyticsMixin.methods.trackAction(this.analyticsContext + event,
-        {
-          ...opts,
-          layout: 'v2',
-          isTrackableRoutineAction: true,
-          userRoutineId: this.userRoutineId,
-          routineId: this.routineId,
-          sessionId: this.sessionId,
-          routineName: this.currentRoutine?.title,
-          sessionName: this.currentSession?.title
-        })
+      this.$emit('analytics', event, {
+        ...opts,
+        layout: 'v2',
+        isTrackableRoutineAction: true,
+        userRoutineId: this.userRoutineId,
+        routineId: this.routineId,
+        sessionId: this.sessionId,
+        routineName: this.currentRoutine?.title,
+        sessionName: this.currentSession?.title
+      })
     },
     async handleScoreSubmitRequest () {
       this.showScoreModal = true

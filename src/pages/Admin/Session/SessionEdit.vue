@@ -4,6 +4,7 @@
     :initialSession="computedSession"
     :isDuplicate="isDuplicate"
     @submit="submitSession"
+    @resetSessionUsersScores="resetSessionUsersScores"
   />
 </template>
 
@@ -46,7 +47,8 @@ export default {
     ...mapActions({
       updateSession: 'session/updateSession',
       _createSession: 'session/createSession',
-      fetchAllSessions: 'session/fetchAllSessions'
+      fetchAllSessions: 'session/fetchAllSessions',
+      resetScoreUserSession: 'session/resetScoreUserSession'
     }),
 
     async submitSession (session) {
@@ -55,6 +57,9 @@ export default {
       } else {
         await this.updateSessionSubmit(session)
       }
+    },
+    async resetSessionUsersScores () {
+      await this.resetScoreUserSession(this.sessionId)
     },
     async createSession (session) {
       try {

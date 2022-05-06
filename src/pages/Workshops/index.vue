@@ -2,9 +2,11 @@
   <n-workshop
     :newAndRelevant="newAndRelevant"
     :categories="categories"
-    :allWorkshops="allWorkshops"
+    :allWorkshops="allWorkshopsList"
     :paginatedSearchedWorkshops="paginatedSearchedWorkshops"
     :paginatedSearchState="paginatedSearchState"
+    :allWorkshopsNumPages="allWorkshopsNumPages"
+    :page="page"
     @get-next-page="getNextPage"
     @select="goToWorkshop"
     @search="searchWorkshops"

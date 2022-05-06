@@ -319,3 +319,27 @@ export const regenerateTrainingPlan = async (ctx) => {
   await api.regenerateTrainingPlan(ctx.rootState.user.currentUser.id)
   ctx.dispatch('fetchUserCurrentTrainingPlan')
 }
+
+export const getUserFriendGroupEvents = async (ctx) => {
+  try {
+    const response = await api.getUserFriendGroupEvents(ctx.rootState.user.currentUser.id)
+    ctx.commit('setUserFriendGroupEvents', response.data.userFriendGroupEvents)
+  } catch { }
+}
+
+export const updateUserFGEventStatus = async (ctx, friendGroupId, status) => {
+  const response = await api.updateUserFGEventStatus(ctx.rootState.user.currentUser.id, friendGroupId, status)
+  ctx.commit('setUserFriendGroupEventStatus', response.data.userFriendGroupEvent)
+}
+
+export const subscribeToEvent = async (ctx, friendGroupId) => {
+  return updateUserFGEventStatus(ctx, friendGroupId, 'subscribed_internal')
+}
+
+export const unsubscribeFromEvent = async (ctx, friendGroupId) => {
+  return updateUserFGEventStatus(ctx, friendGroupId, 'none')
+}
+
+export const declineEvent = async (ctx, friendGroupId) => {
+  return updateUserFGEventStatus(ctx, friendGroupId, 'declined')
+}

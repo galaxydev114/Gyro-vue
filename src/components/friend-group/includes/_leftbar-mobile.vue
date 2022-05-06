@@ -1,13 +1,13 @@
 <template>
-  <div class="col q-px-md q-pt-md border-bottom items-center lt-md">
+  <div class="col q-px-md q-py-md border-bottom items-center lt-md join-fg-menu">
     <div class="full-width q-mr-md cursor-clickable" @click="goBack">
       <c-icon icon="leftArrowRounded" class="float-left"/>
       <span class="q-ml-sm">
         Back to Menu
       </span>
     </div>
-    <div class="q-mt-sm">
-      <div class="full-width">
+    <div class="q-mt-lg ">
+      <div class="join-fg-steps-bar">
         <div class="row join-fg-top-steps">
           <q-item v-for="step in preparingList"
                   :key="`p-step-${step.step}`"
@@ -56,12 +56,25 @@ export default {
 </script>
 
 <style lang="scss">
+  .join-fg-menu {
+    position: relative;
+    background: linear-gradient(180deg, rgba(35, 21, 56, 0.3) 0%, #231538 100%), url('../../../assets/friend-group/mobile-steps-bg.png');
+    background-size: cover;
+    background-position-y: center;
+    background-position-x: center;
+    border-bottom: none;
+  }
+  .join-fg-steps-bar {
+    position: absolute;
+    z-index: 3;
+    width: 92%;
+  }
   .join-fg-top-steps {
     &__item {
       $root: &;
       margin-bottom: 0px;
       min-height: 24px;
-
+      padding: 8px 0px;
       &-index {
         background: $soft-tone;
         width: calc((var(--app-height) / 100) * 1.5);
@@ -82,7 +95,7 @@ export default {
           top: 50%;
           left: 16px;
           display: block;
-          width: 13vw;
+          width: 16vw;
           height: 1px;
           background: $soft-tone;
         }

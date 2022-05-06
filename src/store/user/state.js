@@ -18,6 +18,9 @@ export default {
   trainingPlansAmount: 0,
   maxScores: {
     maxKD: 10,
-    maxPR: 100000
-  }
+    maxPR: 250000
+  },
+  discordData: null,
+  userFriendGroupApplication: null,
+  userFriendGroup: null
 }

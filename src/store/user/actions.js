@@ -10,6 +10,13 @@ export async function login ({ dispatch }, body) {
 }
 
 export async function authorizeUserStored ({ dispatch }) {
+  // try to load pretended user first
+  const userIdFromSession = sessionStorage.getItem('userId')
+  const userTokenFromSession = sessionStorage.getItem('userToken')
+  if (userIdFromSession && userTokenFromSession) {
+    return dispatch('loadUser', userIdFromSession)
+  }
+
   // try to log in with stored credentials
   const userId = localStorage.getItem('userId')
   const token = LocalStorageService.getAccessToken()
@@ -24,10 +31,13 @@ export async function authorizeUser ({ commit, dispatch, getters }, { userId, to
   if (!userId || !token) {
     throw new Error('Invalid user session!')
   }
+
+  localStorage.setItem('userId', userId)
   LocalStorageService.setUserToken({
     access: { token },
     refresh: {}
   })
+
   try {
     await dispatch('loadUser', userId)
     sendSegmentEvent('Login by AnyMethod Success', { userId })
@@ -40,12 +50,22 @@ export async function authorizeUser ({ commit, dispatch, getters }, { userId, to
 }
 
 export async function loadUser ({ commit, dispatch, getters }, userId) {
-  userId = userId || localStorage.getItem('userId', userId)
+  userId = userId || sessionStorage.getItem('userId') || localStorage.getItem('userId')
   if (!userId) {
     return dispatch('logout')
   }
   const res = await api.getUser(userId)
-  const { user, userExperiments, userPaymentPref, trainingPlansAmount, completedOnboarding, collaborator } = res.data
+  const {
+    user,
+    userExperiments,
+    userPaymentPref,
+    trainingPlansAmount,
+    completedOnboarding,
+    collaborator,
+    userFriendGroupApplication,
+    userDiscordData,
+    userFriendGroup
+  } = res.data
   commit('setUser', user)
   commit('setCollaborator', collaborator)
   if (completedOnboarding === undefined || completedOnboarding === null) {
@@ -54,12 +74,14 @@ export async function loadUser ({ commit, dispatch, getters }, userId) {
     commit('setUserCompletedOnboarding', completedOnboarding)
   }
   commit('setTrainingPlansAmount', trainingPlansAmount)
+  commit('setDiscordData', userDiscordData)
   commit('experiments/setUserExperiments', userExperiments, { root: true })
   commit('user/setUserPaymentPref', userPaymentPref, { root: true })
   if (getters.isPaidUser) {
     commit('payments/setUserSubscription', userPaymentPref.userSubscription, { root: true })
   }
-  localStorage.setItem('userId', userId)
+  commit('setUserFriendGroupApplication', userFriendGroupApplication)
+  commit('setUserFriendGroup', userFriendGroup)
   segmentIdentify(userId, {
     ...user,
     userPaymentPref,
@@ -102,6 +124,17 @@ export async function updateUserNickname ({ commit }, { userId, nickname }) {
     .then(res => res.data.user)
     .catch(error => {
       throw new Error(`updateUserNickname: ${error}`)
+    })
+  if (!user) return
+  commit('setUser', user)
+  return user
+}
+
+export async function linkUserDiscordAccount ({ commit }, { userId, code, redirectUri }) {
+  const user = await api.linkUserDiscordAccount(userId, code, redirectUri) // OAuth2 code
+    .then(res => res.data.user)
+    .catch(error => {
+      throw new Error(`linkUserDiscordAccount: ${error}`)
     })
   if (!user) return
   commit('setUser', user)
@@ -272,5 +305,43 @@ export function getReferralsData ({ commit }, userId) {
       .then(res => res.data.referralsData)
   } else {
     throw new Error('getReferralsData without user Id', userId)
+  }
+}
+
+export async function applyForFriendGroup ({ commit }, { userId, applicationData }) {
+  const result = await api.applyForFriendGroup(userId, applicationData)
+  if (result.status === 200) {
+    commit('setUserFriendGroupApplication', result.data.userFriendGroupApplication)
+    commit('setUserFriendGroup', result.data.userFriendGroup)
+  }
+}
+
+// TODO not used atm
+export async function findFriendGroup ({ commit }, userId) {
+  const result = await api.findFriendGroup(userId)
+  if (result.status === 200) {
+    commit('setUserFriendGroupApplication', result.data.userFriendGroupApplication)
+  }
+}
+
+export async function joinFriendGroup ({ commit }, userId) {
+  const result = await api.joinFriendGroup(userId)
+  if (result.status === 200) {
+    commit('setUserFriendGroupApplication', result.data.userFriendGroupApplication)
+  }
+}
+
+// TODO not used atm
+export async function requestAdminAssignment ({ commit }, userId) {
+  const result = await api.requestAdminAssignment(userId)
+  if (result.status === 200) {
+    commit('setUserFriendGroupApplication', null)
+  }
+}
+
+export async function leaveFriendGroup ({ commit }, userId) {
+  const result = await api.leaveFriendGroup(userId)
+  if (result.status === 200) {
+    commit('setUserFriendGroupApplication', null)
   }
 }

@@ -8,9 +8,8 @@ export default function withCancelToken (callback) {
   let cancelToken
 
   return function execute (...args) {
-    // eslint-disable-next-line eqeqeq
-    if (typeof cancelToken != typeof undefined) {
-      cancelToken.cancel('Opearion was canceled due to new request')
+    if (typeof cancelToken !== 'undefined') {
+      cancelToken.cancel('Operation was canceled due to new request')
     }
     cancelToken = axios.CancelToken.source()
 

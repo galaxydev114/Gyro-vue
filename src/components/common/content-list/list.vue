@@ -23,6 +23,7 @@
       <c-btn
         flat
         textColor="dark-pink"
+        :disabled="pagination.blockShowMore && currentPage === pagination.numPages"
         :bold="false"
         @click="$emit('page')"
       >
@@ -76,7 +77,8 @@ import _clamp from '@/util/clamp'
  *   :items="activityList"
  *   :paginationOptions="{
  *     enabled: true,
- *     numPages: 6
+ *     numPages: 6,
+ *     blockShowMore: true
  *   }"
  *   :page="page"
  * />

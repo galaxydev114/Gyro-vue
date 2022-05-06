@@ -17,7 +17,9 @@ export function setUserToken (tokenObj) {
 }
 
 export function getAccessToken () {
-  return localStorage.getItem('userToken')
+  const tokenSession = sessionStorage.getItem('userToken')
+  const tokenLocal = localStorage.getItem('userToken')
+  return tokenSession || tokenLocal
 }
 
 export function getRefreshToken () {

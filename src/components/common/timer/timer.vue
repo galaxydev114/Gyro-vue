@@ -1,5 +1,9 @@
 <script>
 const audio = new Audio(require('@/assets/sounds/timer.wav'))
+const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame || window.msRequestAnimationFrame
+
+const cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame
 
 export default {
   props: {
@@ -22,7 +26,9 @@ export default {
       isStart: false,
       timer: null,
       currentProgress: 0,
-      hasSound: true
+      hasSound: true,
+
+      endTime: 0
     }
   },
   mounted () {
@@ -56,28 +62,20 @@ export default {
     startTimer () {
       this.isStart = true
       this.$emit('start')
-      this.timer = setInterval(() => {
-        --this.time
-        this.currentProgress += 60 / this.seconds
-        if (this.time <= 0) {
-          if (this.hasSound) {
-            setTimeout(() => audio.play(), 100)
-          }
-          this.$emit('time-expire')
-          this.stopTimer()
-        }
-      }, 1000)
+      this.endTime = new Date().getTime() + this.seconds * 1000
+      this.timer = requestAnimationFrame(this.showTimeInterval)
     },
     stopTimer () {
       audio.load()
       this.isStart = false
-      this.time = this.seconds
       this.currentProgress = 0
-      clearInterval(this.timer)
+      cancelAnimationFrame(this.timer)
+      setTimeout(() => {
+        this.time = this.seconds
+      }, 100)
     },
     pauseTimer () {
       this.isStart = false
-      clearInterval(this.timer)
     },
     restart () {
       this.stopTimer()
@@ -88,6 +86,25 @@ export default {
     },
     toggleSound () {
       this.hasSound = !this.hasSound
+    },
+    getRemainingTime (deadline) {
+      const currentTime = new Date().getTime()
+      return (deadline - currentTime) / 1000
+    },
+    showTimeInterval () {
+      this.time = this.getRemainingTime(this.endTime)
+      this.currentProgress += 60 / this.seconds
+      if (this.time >= 1 && this.isStart) {
+        requestAnimationFrame(this.showTimeInterval)
+      } else if (this.time < 1) {
+        if (this.hasSound) {
+          setTimeout(() => audio.play(), 100)
+        }
+        this.time = 0
+        this.isStart = false
+        this.$emit('time-expire')
+        cancelAnimationFrame(this.timer)
+      }
     }
   },
   watch: {

@@ -129,7 +129,9 @@
           :items="allActivities"
           :paginationOptions="{
             enabled: true,
-            infinite: true
+            infinite: true,
+            numPages: allActivitiesNumPages,
+            blockShowMore: true
           }"
           @page="trackAction('CD: Paginated search', {page: searchPage}); $emit('get-next-page')"
           @select-item="selectActivity"
@@ -168,6 +170,12 @@ export default {
     },
     paginatedSearchState: {
       type: Object
+    },
+    allActivitiesNumPages: {
+      type: Number
+    },
+    page: {
+      type: Number
     }
   },
 

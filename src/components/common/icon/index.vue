@@ -32,6 +32,7 @@ export default {
         arrowsDrag: require('@/assets/icons/arrows-drag-icon.svg'),
         done: require('@/assets/icons/icon-done.png'),
         closeCircle: require('@/assets/icons/close circle.svg'),
+        closeWhiteCircle: require('@/assets/icons/close-white-circle.svg'),
         close: require('@/assets/icons/close-icon.svg'),
         plusPink: require('@/assets/icons/plus-icon-pink.svg'),
         plus: require('@/assets/icons/plus-icon.svg'),
@@ -92,13 +93,22 @@ export default {
         supportPink: require('@/assets/icons/supportPink.svg'),
         sharePink: require('@/assets/icons/sharePink.svg'),
         starPink: require('@/assets/icons/starPink.svg'),
+        starFillPink: require('@/assets/icons/starFillPink.svg'),
         menuPink: require('@/assets/icons/menuPink.svg'),
         tip: require('@/assets/icons/tip.svg'),
         rotatePhone: require('@/assets/icons/rotate phone.svg'),
         infoRounded: require('@/assets/icons/infoIcon.svg'),
         couponGreen: require('@/assets/icons/coupone-green.svg'),
         couponPink: require('@/assets/icons/coupone-pink.svg'),
-        allCategories: require('@/assets/icons/all-categories.svg')
+        allCategories: require('@/assets/icons/all-categories.svg'),
+        arrowGreenTop: require('@/assets/icons/arrowGreenTop.svg'),
+        bell: require('@/assets/icons/bell.svg'),
+        trashWhite: require('@/assets/friend-group/icons/trash-icon.svg'),
+        changeWhite: require('@/assets/friend-group/icons/change-icon.svg'),
+        discord: require('@/assets/friend-group/icons/discord-icon.svg'),
+        discordWhite: require('@/assets/friend-group/icons/discord-white-icon.svg'),
+        refreshWhite: require('@/assets/friend-group/icons/refresh-icon.svg'),
+        joinWhite: require('@/assets/friend-group/icons/join-icon.svg')
       }
     }
   }

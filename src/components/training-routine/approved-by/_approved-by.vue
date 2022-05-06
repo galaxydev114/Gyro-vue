@@ -1,12 +1,12 @@
 <template>
   <div class="approved-by" :class="{'approved-by--minimal': minimal}">
-    <div :class="['avatar', { 'avatar--none': minimal }]" role="img">
+    <div :class="['avatar', { 'avatar--none': minimal }]"
+         role="img"
+         :style="{ width: size, height: size }">
       <img class="avatar__img" :src="avatarLink">
     </div>
 
-    <span
-      class="approved-by__text text-weight-medium"
-    >
+    <span class="approved-by__text text-weight-medium">
       <template v-if="!short">{{ label }} </template><a :href="profileLink" target="_blank">{{name}}</a>
     </span>
   </div>
@@ -39,6 +39,10 @@ export default {
     label: {
       type: String,
       default: 'Approved by'
+    },
+    size: {
+      type: String,
+      default: '2rem'
     }
   }
 }
@@ -68,8 +72,6 @@ export default {
 }
 
 .avatar {
-  width: 2rem;
-  height: 2rem;
   border-radius: 50%;
   overflow: hidden;
   margin-right: 5px;

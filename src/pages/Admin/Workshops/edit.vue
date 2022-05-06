@@ -191,7 +191,16 @@
           unchecked-icon="clear"
         />
       </div>
-
+      <div class="form__item">
+        Is Discoverable?
+        <q-toggle
+        size="xl"
+          v-model="isDiscoverable"
+          checked-icon="check"
+          color="green"
+          unchecked-icon="clear"
+        />
+      </div>
       <div class="form__item">
         Is Exclusive?
         <q-toggle
@@ -254,6 +263,7 @@ export default {
       videoUrl: '',
       thumbnail: '',
       isPublished: false,
+      isDiscoverable: false,
       isExclusive: false,
       difficulty: 'EASY',
       timestamps: [],
@@ -288,6 +298,7 @@ export default {
       this.thumbnail = this.computedWorkshop.thumbnail
       this.duration = parsedDuration
       this.isPublished = this.computedWorkshop.isPublished
+      this.isDiscoverable = this.computedWorkshop.isDiscoverable
       this.difficulty = this.computedWorkshop.difficulty
       this.timestamps = this.computedWorkshop.timestamps
       this.isExclusive = this.computedWorkshop.isExclusive
@@ -358,6 +369,7 @@ export default {
         videoUrl: this.videoUrl,
         thumbnail: this.thumbnail,
         isPublished: this.isPublished,
+        isDiscoverable: this.isDiscoverable,
         difficulty: this.difficulty,
         credits: this.credits,
         timestamps: this.timestamps
@@ -387,6 +399,7 @@ export default {
         videoUrl: this.videoUrl,
         thumbnail: this.thumbnail,
         isPublished: this.isPublished,
+        isDiscoverable: this.isDiscoverable,
         isExclusive: this.isExclusive,
         difficulty: this.difficulty,
         credits: this.credits,

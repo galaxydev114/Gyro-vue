@@ -95,7 +95,8 @@ export default {
   methods: {
     ...mapActions({
       updateUserEpicId: 'user/updateUserEpicId',
-      getUserScore: 'user/getUserScore'
+      getUserScore: 'user/getUserScore',
+      reloadUser: 'user/loadUser'
     }),
 
     skipFortniteNickStep  (e) {
@@ -131,6 +132,7 @@ export default {
             if (!user) { throw new Error('No user received.') }
             this.trackAction('User Onboarding: Link Epic Account Success', { userId: this.currentUser.id })
             this.showLoader = true
+            this.reloadUser()
             segmentIdentify(null, {
               name: this.currentUser.email,
               email: this.currentUser.email,
@@ -140,6 +142,7 @@ export default {
               experiments: this.userExperiments
             })
             this.userName = this.currentUser.fortniteNickname
+            this.getUserScore({ userId: this.currentUser?.id, forceCalc: true })
             if (this.skipLoader) {
               this.$emit('next', this.userName, this.redirect)
             }

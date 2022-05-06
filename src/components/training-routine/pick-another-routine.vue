@@ -506,7 +506,7 @@ export default {
     font-size: 2.25rem;
     margin: 0;
     line-height: 110%;
-    font-family: 'Rift', 'sans-serif';
+    font-family: 'rift', 'sans-serif';
     color: $gray;
 
     &--secondary {
@@ -546,7 +546,7 @@ export default {
 }
 
 .routines {
-  --font-family: 'Rift';
+  --font-family: 'rift';
   --font-size: 1rem;
 
   &__aftertitle {

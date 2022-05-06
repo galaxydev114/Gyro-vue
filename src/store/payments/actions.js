@@ -18,3 +18,7 @@ export const cancelSubscription = async () => {
   const res = await api.cancelSubscription()
   return res.data
 }
+export const resumeSubscription = async (ctx) => {
+  await api.resumeSubscription()
+  await ctx.dispatch('user/loadUser', null, { root: true })
+}

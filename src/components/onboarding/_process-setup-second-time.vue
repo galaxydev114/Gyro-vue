@@ -20,7 +20,7 @@
           {{ currentStep }}
         </div>
         <div class="text-subtitle1 text-weight-bold">
-          {{ computedPreperingArray.find(el => el.step === currentStep).label }}
+          {{ currentStepLabel }}
         </div>
       </div>
       <div ref="content" class="onboarding__rightbar q-pa-md q-py-lg q-py-lg-xl q-px-lg-lg relative-position"
@@ -137,7 +137,7 @@ export default {
       const finish = this.currentStep === 5
 
       if (finish) {
-        this.finishUserPreferences({ userId: this.user.id }).then(() => {
+        return this.finishUserPreferences({ userId: this.user.id }).then(() => {
           this.$emit('finish')
         })
       }
@@ -265,6 +265,10 @@ export default {
         }
       ]
       return onboardingStepsLeftPanelArray
+    },
+
+    currentStepLabel () {
+      return this.computedPreperingArray.find(el => el.step === this.currentStep)?.label
     },
 
     skillsPriorityArray: {

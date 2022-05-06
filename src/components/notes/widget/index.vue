@@ -143,7 +143,8 @@ export default {
       this.contentActive = !this.contentActive
     },
     closeWidget (e) {
-      if (document.querySelector('.q-notifications').contains(e.target)) {
+      if (e?.target instanceof Node &&
+        document.querySelector('.q-notifications').contains(e.target)) {
         // NOTE: WORKAROUND: prevent close if user clicks "undo" button of popup
         return
       }

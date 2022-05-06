@@ -1,23 +1,9 @@
 <template>
   <div :class="`col ${minimized ? 'q-mt-xl' : 'q-my-xl'} text-center`">
     <div class="column q-my-lg">
-      <div v-if="!abGoalTest" :class="`col q-mb-md q-mb-sm-lg ${ minimized ? 'text-left' : 'text-center' }`">
-        <div :class="`${ minimized ? 'text-h5' : 'text-h6' } text-weight-bold q-mb-md`">
-          How many hours do you play a day?
-        </div>
-        <div>
-          <div class="q-gutter-md q-gutter-md-lg">
-            <q-radio class="like-button-select" v-model="playTime" val="1" label="1 Hour" />
-            <q-radio class="like-button-select" v-model="playTime" val="3" label="2-3 Hours" />
-            <q-radio class="like-button-select" v-model="playTime" val="5" label="3-5 Hours" />
-            <q-radio class="like-button-select" v-model="playTime" val="7" label="More than 5" />
-          </div>
-        </div>
-      </div>
       <div :class="`col q-mb-md q-mb-sm-lg ${ minimized ? 'text-left' : 'text-center' }`">
         <div :class="`${ minimized ? 'text-h5' : 'text-h6' } text-weight-bold q-mb-md`">
-          {{ abGoalTest ? 'On which days of the week do you want to train?'
-            : 'On which days do you usually play?' }}
+          {{ 'On which days of the week do you want to train?' }}
         </div>
         <div>
           <div class="q-gutter-md q-gutter-md-lg">
@@ -33,8 +19,7 @@
       </div>
       <div :class="`col q-mb-md q-mb-sm-lg ${ minimized ? 'text-left' : 'text-center' }`">
         <div :class="`${ minimized ? 'text-h5' : 'text-h6' } text-weight-bold q-mb-md`">
-          {{ abGoalTest ? 'When do you prefer to train?'
-            : 'When do you usually play?' }}
+          {{ 'When do you prefer to train?' }}
         </div>
         <div>
           <div class="q-gutter-md q-gutter-md-lg">
@@ -45,7 +30,7 @@
           </div>
         </div>
       </div>
-      <div v-if="abGoalTest" :class="`col q-mb-md q-mb-sm-lg ${ minimized ? 'text-left' : 'text-center' }`">
+      <div :class="`col q-mb-md q-mb-sm-lg ${ minimized ? 'text-left' : 'text-center' }`">
         <div :class="`${ minimized ? 'text-h5' : 'text-h6' } text-weight-bold q-mb-md`">
           How many hours available for training do you have each day?
         </div>
@@ -73,7 +58,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 
 export default {
   props: {
@@ -102,9 +86,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      abGoalTest: 'experiments/experimentGyroOnboardingGoal'
-    }),
     canGoNext () {
       return this.dayPlay?.length !== 0 && this.dayTime?.length !== 0 && this.playTime !== 0
     }

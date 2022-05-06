@@ -108,8 +108,11 @@
           :items="allWorkshops"
           :paginationOptions="{
             enabled: true,
-            infinite: true
+            infinite: true,
+            numPages: allWorkshopsNumPages,
+            blockShowMore: true
           }"
+          :page="page"
           @page="$emit('get-next-page')"
         >
           <template v-slot="{item}">
@@ -137,12 +140,19 @@ export default {
       type: Array,
       default: () => []
     },
+    allWorkshopsNumPages: {
+      type: Number,
+      default: undefined
+    },
     paginatedSearchedWorkshops: {
       type: Array,
       default: () => []
     },
     paginatedSearchState: {
       type: Object
+    },
+    page: {
+      type: Number
     }
   },
 

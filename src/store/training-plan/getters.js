@@ -72,7 +72,7 @@ export const getTrainingPlansByDayId = (state) => (dayId) => {
 export const showFinishedAllDailyRoutineModal = (state, getters, rootState, rootGetters) => {
   const finishedDailyRoutinesModal = localStorage.getItem('finishedDailyRoutinesModal')
   const currentDay = Vue.prototype.$date().format('DD/MM/YYYY')
-  if (finishedDailyRoutinesModal !== currentDay) {
+  if (finishedDailyRoutinesModal !== currentDay && Vue.prototype.$date(state.startDate).format('DD/MM/YYYY') === currentDay) {
     const dayOfWeek = getters.trainingPlanOffsetDay
     const dailyRoutinesCompleted = getters.dailyRoutinesCompleted(dayOfWeek)
     if (dailyRoutinesCompleted) {
@@ -108,4 +108,22 @@ export const dailyRoutinesCounter = (state, getters, rootState, rootGetters) => 
 
 export const trainingPlanOffsetDay = (state) => {
   return (Math.ceil(Vue.prototype.$date(Vue.prototype.$date().format('YYYY-MM-DD')).diff(Vue.prototype.$date(Vue.prototype.$date(state.startDate).format('YYYY-MM-DD')), 'day', true)) % 7) + 1
+}
+
+export const userFriendGroupEvents = (state) => {
+  return state.userFriendGroupEvents.filter(el => el.userStatus !== 'declined')
+}
+
+export const getFriendGroupEvent = (state) => (id) => {
+  return state.userFriendGroupEvents?.find(event => event.id === id)
+}
+
+export const getFriendGroupEventParticipants = (state) => (id) => {
+  return getFriendGroupEvent(state)(id)
+    ?.participants?.filter(el => el.isGoing)
+}
+
+export const isUserGoingToEvent = (state, commit, rootState) => (id) => {
+  const participantsThatAreGoing = getFriendGroupEventParticipants(state)(id)
+  return Boolean(participantsThatAreGoing?.find(el => el.userId === rootState.user.currentUser.id))
 }

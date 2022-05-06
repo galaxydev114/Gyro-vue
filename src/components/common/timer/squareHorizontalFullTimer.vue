@@ -123,7 +123,7 @@ export default {
     display: flex;
     margin: auto;
     font-size: 3.25rem;
-    font-family: 'Rift', 'sans-serif';
+    font-family: 'rift', 'sans-serif';
     font-weight: bold;
   }
   &__controlls {

@@ -74,6 +74,14 @@
           >
             cancel subscription
           </c-btn>
+          <c-btn
+            class="modal-subscription-details__info-cancel"
+            outline
+            v-if="!subscriptionWillRenew && info.status === 'active'"
+            @click="$emit('resumeSubscription')"
+          >
+            resume subscription
+          </c-btn>
           <div >
 
           </div>
@@ -104,6 +112,10 @@
         </div>
 
         <div>
+          <c-btn v-if="!subscriptionWillRenew && info.status === 'active'" @click="$emit('resumeSubscription')" class="q-mt-md cancel-button">
+            resume subscription
+          </c-btn>
+
           <c-btn v-if="subscriptionWillRenew" @click="$emit('cancelSubscription')" class="q-mt-md cancel-button">
             cancel subscription
           </c-btn>
@@ -156,7 +168,8 @@ export default {
         subscriptionType: this.userSubscription?.bluesnap?.chargeFrequency,
         price: this.userSubscription?.bluesnap?.recurringCharge,
         renewalDate: this.userSubscription?.bluesnap?.nextChargeDate,
-        startDate: this.userSubscription?.updatedAt
+        startDate: this.userSubscription?.updatedAt,
+        status: this.userSubscription?.status
       }
     },
     card () {

@@ -2,6 +2,174 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.239](https://gitlab.com/novos-heroes/gyro/compare/v0.1.238...v0.1.239) (2022-03-13)
+
+
+### Bug Fixes
+
+* add donwozi as code copuon ([ea741ff](https://gitlab.com/novos-heroes/gyro/commit/ea741ff3344267026cf647c9b27cd7f2dd20d329))
+
+### [0.1.238](https://gitlab.com/novos-heroes/gyro/compare/v0.1.237...v0.1.238) (2022-03-10)
+
+
+### Features
+
+* add support for inverse score initial score ([b81c0dd](https://gitlab.com/novos-heroes/gyro/commit/b81c0ddfe1c58c80a49a172c8b22e67816b0fb5a))
+* add support for timing setting inside session for routine ([89bd613](https://gitlab.com/novos-heroes/gyro/commit/89bd613801aa363ac990762752b7c55b37b660eb))
+* resume subscription ([1550987](https://gitlab.com/novos-heroes/gyro/commit/1550987392b7f3f9c8687ef443a7af345d27b5e9))
+* support reverse score tracking ([6969920](https://gitlab.com/novos-heroes/gyro/commit/6969920d441fe8518e8ffb19d469dea2836b1734))
+
+
+### Bug Fixes
+
+* add support for time scores for progress page ([8758218](https://gitlab.com/novos-heroes/gyro/commit/8758218c05bc022660dc30beb9e3f5b29a8ffb5d))
+* contains non-node target (Sentry:GYRO-36N) ([e92a122](https://gitlab.com/novos-heroes/gyro/commit/e92a1224caccff2192e6721afd6af2628d84c6c1))
+* remove unused code ([866c4ac](https://gitlab.com/novos-heroes/gyro/commit/866c4acaf6e5cb0eebf1046f4c93b1d315bc240e))
+* runtime error ([78bcf4a](https://gitlab.com/novos-heroes/gyro/commit/78bcf4ab43a1911ea29d14b677b501ece35d8a48))
+* score submit tip ([d67f993](https://gitlab.com/novos-heroes/gyro/commit/d67f993cd4f7284dfc3b68fa5e279d972d3e14aa))
+* scroll to uncompleted activity ([e1bb8e0](https://gitlab.com/novos-heroes/gyro/commit/e1bb8e0d0939de278da632fdc9752d48b6626701))
+* time score for nulls ([8fa5e41](https://gitlab.com/novos-heroes/gyro/commit/8fa5e41115688fb703421f747bdfd19ab0fbf0e7))
+* undefined onboarding step after finished (Sentry:GYRO-3B1) ([748fcbe](https://gitlab.com/novos-heroes/gyro/commit/748fcbeabdbf50cba494b9706b9d8a5b695f2390))
+
+### [0.1.237](https://gitlab.com/novos-heroes/gyro/compare/v0.1.236...v0.1.237) (2022-03-10)
+
+
+### Features
+
+* add new coupon code JAPPAZ ([a793c07](https://gitlab.com/novos-heroes/gyro/commit/a793c07394b9ec93c5825732450fd447abf09979))
+
+
+### Bug Fixes
+
+* don't show daily completed modal for not this specific days ([79afffb](https://gitlab.com/novos-heroes/gyro/commit/79afffb150f06c133491ba6e6bcb909673cc1cfa))
+
+### [0.1.236](https://gitlab.com/novos-heroes/gyro/compare/v0.1.235...v0.1.236) (2022-03-03)
+
+
+### Bug Fixes
+
+* hotfix courses minimize iicon ([2cd01b4](https://gitlab.com/novos-heroes/gyro/commit/2cd01b47e20a45f0cf75964108fbaaadd47ad637))
+
+### [0.1.235](https://gitlab.com/novos-heroes/gyro/compare/v0.1.234...v0.1.235) (2022-03-03)
+
+
+### Bug Fixes
+
+* call get user score after link epic account ([de7a1f1](https://gitlab.com/novos-heroes/gyro/commit/de7a1f13a19a616545742ce7844b67d7d31f1148))
+* cta for courses ([7f0e2b9](https://gitlab.com/novos-heroes/gyro/commit/7f0e2b9ecfc9a31617079dec522caee73ac523eb))
+* double scroll ([a467d45](https://gitlab.com/novos-heroes/gyro/commit/a467d450ad3e3148a5ff3c63471a805b75ec96cb))
+* double scroll ([5dfb352](https://gitlab.com/novos-heroes/gyro/commit/5dfb352a612228531cd70c5cd1b24e2c60f042ed))
+* reload the user after epic link ([c649a44](https://gitlab.com/novos-heroes/gyro/commit/c649a445f3be4e870aff7758e735a39185dfb342))
+* scrolling for mobile ([226e8e7](https://gitlab.com/novos-heroes/gyro/commit/226e8e79b146a14e8d7447996f30728c86af26fc))
+
+### [0.1.234](https://gitlab.com/novos-heroes/gyro/compare/v0.1.233...v0.1.234) (2022-02-28)
+
+
+### Bug Fixes
+
+* hotfix course three dots ui issue ([8d23333](https://gitlab.com/novos-heroes/gyro/commit/8d23333b8afb5d32d0cebacca755434796b8bed0))
+
+### [0.1.233](https://gitlab.com/novos-heroes/gyro/compare/v0.1.232...v0.1.233) (2022-02-28)
+
+
+### Bug Fixes
+
+* hotfix block courses accessiblity for non paying users ([5b291ce](https://gitlab.com/novos-heroes/gyro/commit/5b291ce30de1ac03f4898aa2bd7b7b04eb31c150))
+
+### [0.1.232](https://gitlab.com/novos-heroes/gyro/compare/v0.1.231...v0.1.232) (2022-02-27)
+
+### [0.1.231](https://gitlab.com/novos-heroes/gyro/compare/v0.1.230...v0.1.231) (2022-02-26)
+
+
+### Features
+
+* hotfix - modify card hove behavior & enhance CTA courses with start instead of continue ([749b4a5](https://gitlab.com/novos-heroes/gyro/commit/749b4a577ffdf799d829c41c502ab907e38ae056))
+
+
+### Bug Fixes
+
+* hotfix - support creator for knowledge where approved by doesn't exist ([4c5b4d7](https://gitlab.com/novos-heroes/gyro/commit/4c5b4d794346a35f135e819070a751321b3af7e7))
+
+### [0.1.230](https://gitlab.com/novos-heroes/gyro/compare/v0.1.229...v0.1.230) (2022-02-24)
+
+
+### Bug Fixes
+
+* course activity completion ([d55b12b](https://gitlab.com/novos-heroes/gyro/commit/d55b12b0bbadd73615f504cb076e6ea839a696e4))
+* course progress rounding ([c657b5c](https://gitlab.com/novos-heroes/gyro/commit/c657b5cd42722f6685f238ef8eec524ef7fad0d9))
+
+### [0.1.229](https://gitlab.com/novos-heroes/gyro/compare/v0.1.228...v0.1.229) (2022-02-23)
+
+
+### Features
+
+* analytics for courses ([597f7b9](https://gitlab.com/novos-heroes/gyro/commit/597f7b9ace4e5786aab7e3da2312484de7816ab9))
+
+
+### Bug Fixes
+
+* course margin in workshop ([41a8095](https://gitlab.com/novos-heroes/gyro/commit/41a8095e674966cd162b57f58cfd779be4860e3a))
+* course optimization ([3abacba](https://gitlab.com/novos-heroes/gyro/commit/3abacba97178d258d0c7e5b31549f6690cbf2f06))
+* lottie animation for knowledgetime ([3eda9a4](https://gitlab.com/novos-heroes/gyro/commit/3eda9a4ea2ce72ad5a14267a1e03caaf42030d84))
+* text overflow courses block ([99f1f18](https://gitlab.com/novos-heroes/gyro/commit/99f1f18308dea5e9c97b7a392e6d55cc4ab44c45))
+* text to 60% in knowledgetime course ([916459d](https://gitlab.com/novos-heroes/gyro/commit/916459d575309bf1431864a4504656ea1b9e825d))
+* ui fixes for courses ([29e91fa](https://gitlab.com/novos-heroes/gyro/commit/29e91faafef047cbf9940bd1310858af81667771))
+
+### [0.1.228](https://gitlab.com/novos-heroes/gyro/compare/v0.1.227...v0.1.228) (2022-02-21)
+
+
+### Features
+
+* remove is board experiment ([e8e54b7](https://gitlab.com/novos-heroes/gyro/commit/e8e54b7f66a93dfe36f0b4faa8e9371997778918))
+
+### [0.1.227](https://gitlab.com/novos-heroes/gyro/compare/v0.1.226...v0.1.227) (2022-02-21)
+
+
+### Bug Fixes
+
+* course rate modal text ([1b9d0c1](https://gitlab.com/novos-heroes/gyro/commit/1b9d0c1463fac396b87626af0e210b2af2e57351))
+* text change for rate modal ([2e21f03](https://gitlab.com/novos-heroes/gyro/commit/2e21f03462bf77462c476270d38ab5ad3bfafed7))
+* upgrade modal ([fb90437](https://gitlab.com/novos-heroes/gyro/commit/fb90437444a6ae4f36fdfbb7dc232bbe5f3fa72d))
+
+### [0.1.226](https://gitlab.com/novos-heroes/gyro/compare/v0.1.225...v0.1.226) (2022-02-20)
+
+
+### Features
+
+* [WIP] courses integratio ([878a5c7](https://gitlab.com/novos-heroes/gyro/commit/878a5c7bb8b3dde7730e9df3af4eb31af7da464e))
+* analytics for courses wip ([8668c97](https://gitlab.com/novos-heroes/gyro/commit/8668c97d04ba157ce03113d625c615906a5aa347))
+* close rate modal event ([5d37ba3](https://gitlab.com/novos-heroes/gyro/commit/5d37ba3dc6ed00c5019061ea5e32309b7265e0f4))
+* congrats modal implemented ([e0c5dd9](https://gitlab.com/novos-heroes/gyro/commit/e0c5dd927144bb09bdc286aad9856eb797026be4))
+* courses experiment ([67f8ce7](https://gitlab.com/novos-heroes/gyro/commit/67f8ce71cc2af68485a8ce48d2a07cce11b79941))
+* isDiscoverable for knowledge / workshop admin panel ([af8a80d](https://gitlab.com/novos-heroes/gyro/commit/af8a80db51bad52cf7b15f723ce5d398e7e99d43))
+* knowledge / workshops data ([2b615dc](https://gitlab.com/novos-heroes/gyro/commit/2b615dc6e8da7a399365a0bf4f6dda01162fcb49))
+* routine and course durations ([8e5f55c](https://gitlab.com/novos-heroes/gyro/commit/8e5f55c7128af9ec21ba2d9beae59c881b2f657f))
+* workshop functionality ([f295ad0](https://gitlab.com/novos-heroes/gyro/commit/f295ad0a8715561bb627c8b69f57a9358008fc33))
+
+
+### Bug Fixes
+
+* completion logic ([2326c20](https://gitlab.com/novos-heroes/gyro/commit/2326c20c69f9553db48c0524f932e783c60fde1d))
+* continue course button ([8da6f2e](https://gitlab.com/novos-heroes/gyro/commit/8da6f2e00445e4028818609f7c392f91b4c3b9a9))
+* hide redundand buttons for now ([b4fe111](https://gitlab.com/novos-heroes/gyro/commit/b4fe1112bc2510c149f86618c82bdebf2bc8f40a))
+* remove 'new' from courses ([013613f](https://gitlab.com/novos-heroes/gyro/commit/013613f12698ff2aca550a07a5aec776d62001d1))
+* routing overhaul for routines ([d92ecb4](https://gitlab.com/novos-heroes/gyro/commit/d92ecb4a215d24ed927b0e4e5f67c17b1667e461))
+* UI issue ([a57b00b](https://gitlab.com/novos-heroes/gyro/commit/a57b00ba4896144f9f0256c118abbdd5481648a4))
+
+### [0.1.225](https://gitlab.com/novos-heroes/gyro/compare/v0.1.224...v0.1.225) (2022-02-17)
+
+
+### Features
+
+* add new promo AUBRISK ([5c4f9d5](https://gitlab.com/novos-heroes/gyro/commit/5c4f9d540ea060214b3c97a306f327eca19e3409))
+
+### [0.1.224](https://gitlab.com/novos-heroes/gyro/compare/v0.1.223...v0.1.224) (2022-02-17)
+
+
+### Bug Fixes
+
+* navigate to correct location when workshop completed ([d2e5f10](https://gitlab.com/novos-heroes/gyro/commit/d2e5f10b6f7c20a049afd5c063780ca1da6cb9b8))
+
 ### [0.1.223](https://gitlab.com/novos-heroes/gyro/compare/v0.1.222...v0.1.223) (2022-02-13)
 
 

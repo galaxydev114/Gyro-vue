@@ -16,6 +16,7 @@
       :videoUrl="isShowingSecondVideo ?  content.secVideoUrl : content.videoUrl"
       :thumbnail="isShowingSecondVideo ? content.secThumbnail : content.thumbnail"
       :sessions="currentRoutine.sessions"
+      :participants="participants"
       :lastUpdated="content.lastUpdated"
       :sessionId="sessionId"
       :trainingSessionStats="trainingSessionStats"
@@ -25,14 +26,16 @@
       :benchmark="currentSession && currentSession.benchmark"
       :routineDaysCounter="computedRoutineDaysCounter"
       :isRoutineStarted="isRoutineStarted"
-      :isRoutineCompleted="isRoutineInitiallyCompleted"
+      :isRoutineCompleted="externalCompletion ? isRoutineCompleted : isRoutineInitiallyCompleted"
       :isRoutineMeasurable="isRoutineMeasurable"
+      :nonCompletable="nonCompletable"
       :isDone="currentSession && currentSession.isCompleted"
       :isLoggedIn="isLoggedIn"
       :isInActivity="!!userRoutineId"
       :animation="animation"
       :userEmail="userEmail"
       :currentSessionScore="currentSession && currentSession.score"
+      :isUserGoing="isUserGoing"
       backButtonName='Go back'
       v-on="$listeners"
       @pick-another-routine="openPickAnotherRoutineDialog"
@@ -49,7 +52,7 @@
       @close="closePickAnotherRoutineDialog"
       @select="selectAnotherRoutineDialog"
     />
-
+   <!--  TODO  handle case for courses -->
     <n-congrats-routine
       v-if="currentRoutine"
       :ctaTitle="isDiscovery ? 'Back to discover' : 'Go to training plan'"
@@ -90,18 +93,6 @@ export default {
       type: Boolean,
       default: null
     },
-    urlForRoutineOverview: {
-      type: Object,
-      default: null
-    },
-    urlForSession: {
-      type: Object,
-      default: null
-    },
-    analyticsContext: {
-      type: String,
-      default: ''
-    },
     isCongratsVisible: {
       type: Boolean,
       default: false
@@ -137,6 +128,22 @@ export default {
     computedMap: {
       type: Object,
       default: null
+    },
+    externalCompletion: {
+      type: Boolean,
+      default: false
+    },
+    nonCompletable: {
+      type: Boolean,
+      default: false
+    },
+    participants: {
+      type: Array,
+      default: () => []
+    },
+    isUserGoing: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -295,7 +302,7 @@ export default {
       await this.pickAnotherRoutine({ newRoutine: userTrainingRoutine, oldId: this.userRoutineId })
 
       this.closePickAnotherRoutineDialog()
-      this.$router.replace({ ...this.urlForRoutineOverview, query: { userTrainingActivityId: userTrainingRoutine.id }, params: { id: choosedRoutine.id } })
+      this.$emit('new-routine-picked', { routineId: choosedRoutine.id, userTrainingActivityId: userTrainingRoutine.id })
     }
   },
   watch: {

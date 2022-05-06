@@ -335,9 +335,51 @@
         />
       </div>
 
+      <q-toggle
+        size="xl"
+        v-model="session.isScoreInversed"
+        checked-icon="check"
+        color="green"
+        unchecked-icon="clear"
+      >
+        Is Score Inversed
+      </q-toggle>
+      <q-toggle
+        size="xl"
+        v-model="session.isScoreTime"
+        checked-icon="check"
+        color="green"
+        unchecked-icon="clear"
+      >
+        Is Score In Time Format
+      </q-toggle>
+
+      <q-dialog v-model="showResetScoreDialog" persistent>
+        <q-card style="background: #231538;">
+          <q-card-section class="row items-center">
+            <span class="q-ml-sm text-h2">{{`DELETE ALL PLAYERS SCORES FOR `}}<br><span class="text-red">{{`${session.title} ?`}}</span></span>
+            <span class="q-ml-sm text-bold">( Meant for TRACKABLE SESSIONS. Ensure you have saved the session first! )</span>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <c-btn type="submit" class="q-mr-sm" v-close-popup>
+              CANCEL
+            </c-btn>
+            <c-btn type="submit" @click="$emit('resetSessionUsersScores')" v-close-popup>
+              DELETE SCORES
+            </c-btn>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
       <div class="form__item">
         <c-btn type="submit">
           {{isDuplicate ? 'Create Duplication' : 'Save'}}
+        </c-btn>
+      </div>
+      <div style="padding-top:20px">
+        <c-btn @click="resetScoreClicked">
+          Reset score (tracking)
         </c-btn>
       </div>
     </q-form>
@@ -397,6 +439,7 @@ export default {
 
   data () {
     return {
+      showResetScoreDialog: false,
       showFull: false,
       showNew: true,
       showLoader: false,
@@ -496,6 +539,8 @@ export default {
         this.session.credits = (!this.initialSession.credits || (this.initialSession.credits.length === undefined && typeof this.initialSession.credits === 'object')) ? [] : this.initialSession.credits
         this.session.fov = this.initialSession.fov
         this.session.benchmark = this.initialSession.benchmark
+        this.session.isScoreInversed = this.initialSession.isScoreInversed
+        this.session.isScoreTime = this.initialSession.isScoreTime
       }
     },
 
@@ -610,6 +655,9 @@ export default {
       return this.$refs.createEditSessionForm.validate()
     },
 
+    resetScoreClicked () {
+      this.showResetScoreDialog = true
+    },
     saveChanges () {
       this.checkIsFormValid().then(isSuccess => {
         if (isSuccess && this.isAdmin) {

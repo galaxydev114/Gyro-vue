@@ -3,9 +3,13 @@
             @keydown.esc="closeOnEsc"
             :maximized="$q.screen.xs"
             no-backdrop-dismiss
-            no-esc-dismiss>
+            no-esc-dismiss
+            :content-class="{'backdrop-dark': bgDarkMode}">
     <div class="n-modal"
          :style="`height: ${height}; width: ${getWidth}; max-height: ${maxHeight}`">
+      <div class="n-modal__header-bg" v-if="showHeader && $q.screen.gt.sm">
+        <img src="@/assets/modal-header.svg" />
+      </div>
       <div class="n-modal__close"
            v-if="showClose && !forceHideClose"
            @click="$emit('close')">
@@ -41,6 +45,10 @@ export default {
       type: Boolean,
       default: false
     },
+    showHeader: {
+      type: Boolean,
+      default: false
+    },
     height: {
       type: String,
       default: () => 'auto'
@@ -52,6 +60,10 @@ export default {
     width: {
       type: String,
       default: () => 'auto'
+    },
+    bgDarkMode: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -101,6 +113,9 @@ export default {
     backdrop-filter: none;
   }
 }
+.backdrop-dark {
+  backdrop-filter: blur(6px);
+}
 .q-dialog .n-modal{
   background: $dark;
   max-width: 90%;
@@ -110,6 +125,15 @@ export default {
   z-index: 2147483647;
   /deep/ * {
     user-select: none;
+  }
+  &__header-bg{
+    height: 60px;
+    overflow: hidden;
+    display: block;
+    background: linear-gradient(151.32deg, #D92779 17.68%, #7C277E 86.39%);
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    z-index: 9;
   }
   &__close{
     position: absolute;

@@ -1,104 +1,54 @@
 <template>
   <q-page class="container">
-    <div class="joinfg__base text-gray">
-      <joining-process-setup :userName="userName"
-                    :skipScore="shouldSkipScore"
-                    :emailAddress="currentUser.email"
-                    @finish="finishOnboardingClicked"
-                    @start-over="showType = 'user-setup'"/>
+    <page-loader v-if="showLoader" />
+    <div v-else class="joinfg__base text-gray">
+      <joining-process-setup
+        :skipLooking="shouldSkipLooking"
+        :applicationReadyCallback="finishFGApplication"
+      />
     </div>
   </q-page>
 </template>
 
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
+    'page-loader': () => import('@/components/common/page-loader'),
     'joining-process-setup': () => import('@/components/friend-group/_joining-process-setup')
-  },
-  computed: {
-    ...mapGetters({
-      accessCodeValid: 'accessCode/accessCodeValid',
-      currentUser: 'user/currentUser',
-      userScore: 'user/userScore',
-      isLoggedIn: 'user/isLoggedIn'
-    }),
-    ...mapState('user', ['completedOnboarding'])
   },
   data () {
     return {
-      userName: null,
-      showType: 'user-setup',
-      shouldSkipScore: false,
-      email: null,
-      isWithEmail: false,
-      promo: null,
-      isWithPromo: false,
-      isWithAccessCode: false
+      shouldSkipLooking: true,
+      showLoader: false
     }
+  },
+  computed: {
+    ...mapGetters({
+      currentUser: 'user/currentUser',
+      currentUserScore: 'user/currentUserScore'
+    })
   },
   methods: {
-    ...mapActions('user', [
-      'authorizeUserStored',
-      'getLastUserPreferences',
-      'logout'
-    ]),
-
-    skipFNStep () {
-      this.shouldSkipScore = true
-      this.showProcessSetup(null)
-    },
-
-    showProcessSetup (user) {
-      if (!this.userScore || !Object.values(this.userScore)?.filter(Boolean).length) {
-        this.shouldSkipScore = true
+    ...mapActions({
+      reloadUser: 'user/loadUser',
+      getUserScore: 'user/getUserScore',
+      applyForFriendGroup: 'user/applyForFriendGroup'
+    }),
+    async finishFGApplication (applicationData) {
+      if (this.currentUser?.id) {
+        // TODO: No sure what logic needed here
+        await this.applyForFriendGroup({ userId: this.currentUser.id, applicationData })
       }
-      this.userName = user
-      this.showType = 'process-setup'
-    },
-    shouldShow (type) {
-      return this.showType === type
-    },
-    finishOnboardingClicked () {
-      this.trackAction('Finish Onboarding', { promo: this.$route.query.promocode })
-      this.$router.push('/training-plan?joinfg=first')
-    },
-
-    preventNav (e) {
-      if (!this.shouldShow('process-setup')) return
-      e.preventDefault()
-      e.returnValue = ''
-    },
-
-    collectMetricsOnStart () {
-      this.trackAction('Start Onboarding', {
-        isWithEmail: this.isWithEmail,
-        isWithPromo: this.isWithPromo,
-        email: this.email,
-        promo: this.promo,
-        isWithAccessCode: this.isWithAccessCode
-      })
-    },
-    collectDataOnStart () {
-      this.email = this.$route.query.email
-      this.isWithEmail = Boolean(this.email)
-      this.promo = this.$route.query.promocode
-      this.isWithPromo = Boolean(this.promo)
-      this.isWithAccessCode = Boolean(this.accessCodeValid)
     }
   },
-  async mounted () {
-    this.collectDataOnStart()
-    this.collectMetricsOnStart()
-  },
-  beforeMount () {
-    window.addEventListener('beforeunload', this.preventNav)
-  },
-  beforeDestroy () {
-    window.removeEventListener('beforeunload', this.preventNav)
-    this.currentStep = 1
-    this.userName = ''
+  async created () {
+    this.showLoader = true
+    if (!this.currentUserScore) {
+      await this.getUserScore({ userId: this.currentUser?.id, forceCalc: true })
+    }
+    this.showLoader = false
   },
   beforeRouteEnter (to, from, next) {
     if (to.query.accessCode) {
@@ -169,8 +119,8 @@ export default {
 
     &-index {
       background: $soft-tone;
-      width: calc((var(--app-height) / 100) * 4.5);
-      height: calc((var(--app-height) / 100) * 4.5);
+      width: calc((var(--app-height) / 100) * 5);
+      height: calc((var(--app-height) / 100) * 5);
       border-radius: 100%;
       display: flex;
       align-items: center;

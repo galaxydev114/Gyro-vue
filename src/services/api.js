@@ -54,8 +54,10 @@ export const changePassword = body => axiosClient.post('/gyro/auth/change-passwo
 
 export const createUser = body => axiosClient.post('/gyro/users', body)
 export const getUser = userId => axiosClient.get(`/gyro/users/${userId}`, { headers: getAuthHeader() })
+export const searchUsers = searchTerm => axiosClient.get(`/gyro/users?s=${searchTerm}`)
 export const updateUserNickname = (userId, nick) => axiosClient.patch(`/gyro/users/${userId}/nickname`, { nick })
 export const updateUserEpicAccount = (userId, code) => axiosClient.post(`/gyro/users/${userId}/link-epic`, { code })
+export const linkUserDiscordAccount = (userId, code, redirectUri) => axiosClient.post(`/gyro/users/${userId}/link-discord`, { code, redirect_uri: redirectUri })
 export const unlinkUserEpicAccount = (userId) => axiosClient.post(`/gyro/users/${userId}/unlink-epic`)
 export const updateUserPreferences = (userId, userPreferencesUpdated) => axiosClient.patch(`/gyro/users/${userId}/preferences`, userPreferencesUpdated)
 export const editUserPreferences = (userId, userPreferencesUpdated) => axiosClient.patch(`/gyro/users/${userId}/editpreferences`, { userPreferencesUpdated })
@@ -77,6 +79,9 @@ export const deleteRoutineFromTrainingPlan = (userId, routineId) => axiosClient.
 export const adjustRoutineTimeWithinDay = (userId, userRoutineId, body) => axiosClient.patch(`/gyro/users/${userId}/training-plan/routines/${userRoutineId}/time-slot`, body, { headers: { secret: loadSecret() } })
 export const updateTrainingPlan = withCancelToken((cancelToken, trainingPlan) => axiosClient.put(`/gyro/training-plans/${trainingPlan.id}`, { trainingPlan }, { cancelToken }))
 
+// Training Activites
+export const getTrainingActivity = (trainingActivityId) => axiosClient.get(`/gyro/activities/${trainingActivityId}`)
+
 // Sessions
 export const createSession = body => axiosClient.post('/gyro/sessions', body)
 export const getSessions = (sessionIds = [], fulldesc = false) => axiosClient.get('/gyro/sessions', {
@@ -85,6 +90,7 @@ export const getSessions = (sessionIds = [], fulldesc = false) => axiosClient.ge
 export const updateSession = (sessionId, body) => axiosClient.put(`/gyro/sessions/${sessionId}`, body)
 export const getTrainingRoutineSessions = userTrainingRoutineId => axiosClient.get(`/gyro/training-routines/${userTrainingRoutineId}/sessions`, { headers: getAuthHeader() })
 export const deleteSession = (sessionId) => axiosClient.delete(`/gyro/sessions/${sessionId}`)
+export const resetScoreUserSession = (sessionId) => axiosClient.delete(`/gyro/sessions/${sessionId}/user-score`)
 export const getTrainingRoutinesSessions = (userTrainingRoutineIds) => axiosClient.post('/gyro/training-routines/sessions', { userTrainingRoutineIds })
 export const markSessionAsDone = (routineId, sessionId) => axiosClient.put(`/gyro/users/routines/${routineId}/sessions/${sessionId}/is-completed`, { isCompleted: dayjs().format('YYYY-MM-DD') })
 
@@ -162,6 +168,7 @@ export const getPaymentPlans = () => axiosClient.get('/gyro/payments/plans')
 export const getCheckoutPageUrl = (userId, paymentPlanId, couponCode) => axiosClient.get('/gyro/payments/checkoutPage', { params: { userId, paymentPlanId, couponCode } })
 export const getSubscription = () => axiosClient.get('/gyro/payments/subscription', { headers: getAuthHeader() })
 export const cancelSubscription = () => axiosClient.post('/gyro/payments/subscription/cancel', {}, { headers: getAuthHeader() })
+export const resumeSubscription = () => axiosClient.post('/gyro/payments/subscription/resume', {}, { headers: getAuthHeader() })
 export const obtainPfToken = () => axiosClient.get('/gyro/payments/pfToken')
 export const proceedCheckout = ({ userId, pfToken, paymentPlanId }) => axiosClient.post('/gyro/payments/checkout', { userId, pfToken, paymentPlanId })
 export const refundByEmail = (email) => axiosClient.post('/gyro/payments/refund', { email })
@@ -170,6 +177,7 @@ export const refundByCsv = (formData) => axiosClient.post('/gyro/payments/refund
     'Content-Type': 'multipart/form-data'
   }
 })
+export const checkCouponCode = withCancelToken((cancelToken, couponCode) => axiosClient.get(`/gyro/payments/coupons/${couponCode}`, { cancelToken }))
 
 // Activities
 export const getUserActivitiesStats = (userId) => axiosClient.get(`/gyro/users/${userId}/activities`)
@@ -204,6 +212,11 @@ export const getPaginatedWorkshops = ({ page, creator, category, title, difficul
 }
 export const markWorkshopDone = (userId, workshopId) => axiosClient.put(`/gyro/users/${userId}/workshops/${workshopId}/is-completed`, { isCompleted: dayjs().format('YYYY-MM-DD') })
 
+// Courses
+export const getUserCourses = (userId, withActivities) => axiosClient.get(`/gyro/users/${userId}/courses${withActivities ? '?withActivities=' + withActivities : ''}`)
+export const getUserCourse = (userId, courseId) => axiosClient.get(`/gyro/users/${userId}/courses/${courseId}?withActivities=true`)
+export const getUserCourseTrainingActivity = (userId, courseId, trainingActivityId) => axiosClient.get(`/gyro/users/${userId}/courses/${courseId}/activities/${trainingActivityId}`)
+
 // Content partners
 export const getCoaches = () => axiosClient.get('/gyro/coaches')
 export const getCollaborators = () => axiosClient.get('/gyro/collaborators')
@@ -235,6 +248,18 @@ export const deletePlatformNews = (platformNewsId) => axiosClient.delete(`/gyro/
 export const createPlatformNews = (data) => axiosClient.post('/gyro/platform-news', data)
 export const getAllPlatformNews = () => axiosClient.get('/gyro/platform-news')
 
+// Friend groups
+export const getFriendGroups = () => axiosClient.get('/gyro/friend-groups')
+export const createFGEvent = ({ earliestDate, latestDate, trainingRoutineId, friendGroupIds }) => axiosClient.post('/gyro/friend-groups/events', { earliestDate, latestDate, trainingRoutineId, friendGroupIds })
+export const getUserFriendGroupApplications = () => axiosClient.get('/gyro/friend-groups/applications')
+export const updateUserFriendGroupApplications = ({ applicationId, friendGroupId }) => axiosClient.patch(`/gyro/friend-groups/applications/${applicationId}`, { friendGroupId })
+export const applyForFriendGroup = (userId, { availability, region, language, platform, league }) => axiosClient.post(`/gyro/users/${userId}/friend-group/apply`, { availability, region, language, platform, league })
+export const findFriendGroup = (userId) => axiosClient.post(`/gyro/users/${userId}/friend-group/find`)
+export const requestAdminAssignment = (userId) => axiosClient.post(`/gyro/users/${userId}/friend-group/request-admin-assignment`)
+export const joinFriendGroup = (userId) => axiosClient.post(`/gyro/users/${userId}/friend-group/join`)
+export const leaveFriendGroup = (userId) => axiosClient.post(`/gyro/users/${userId}/friend-group/leave`)
+export const getUserFriendGroupEvents = (userId) => axiosClient.get(`/gyro/users/${userId}/friend-group/events`)
+export const updateUserFGEventStatus = (userId, friendGroupEventId, status) => axiosClient.patch(`/gyro/users/${userId}/friend-group/events/${friendGroupEventId}/status`, { status })
 // Other
 export const sendReferralAnalytics = (userId, referralId, eventId) => axiosClient.post('/gyro/events/referrals', {
   userId, referralId, eventId
@@ -244,3 +269,4 @@ export const getPlatformUpdates = () => axiosClient.get('/gyro/updates')
 export const regenerateTrainingPlan = (userId) => axiosClient.post(`/gyro/users/${userId}/training-plan/regenerate`)
 export const createSupportTicket = ({ userId, name, email, description }) => axiosClient.post(`/gyro/users/${userId}/support/tickets`, { name, email, description })
 export const getPartnerEarnings = (partnerId) => axiosClient.get(`/gyro/collaborators/${partnerId}/earnings`)
+export const loginAsPretendedUser = (userId) => axiosClient.post('/gyro/auth/login/pretended', { userId })

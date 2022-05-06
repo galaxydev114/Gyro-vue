@@ -137,6 +137,10 @@ export default {
     poster: {
       type: String,
       default: require('@/assets/other/Fortnite-Original-Map.webp')
+    },
+    externalTrackAction: {
+      type: Function,
+      default: null
     }
   },
   data () {
@@ -270,9 +274,11 @@ export default {
           elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
           const scrollablePage = getScrollTarget(elementToScroll)
+          // scrollablePage is undefined for courses, setting to 0
+          const scrollablePageTop = scrollablePage?.getBoundingClientRect().top || 0
 
           scrollablePage.scrollBy({
-            top: elementToScroll.getBoundingClientRect().top - scrollablePage.getBoundingClientRect().top,
+            top: elementToScroll.getBoundingClientRect().top - scrollablePageTop,
             left: 0,
             behavior: 'smooth'
           })

@@ -43,7 +43,7 @@ export default {
     left: 50%;
     transform: translateY(-50%) translateX(-50%);
     position: absolute;
-    font-family: 'Rift', 'serif';
+    font-family: 'rift', 'serif';
     font-size: 16px;
     font-weight: bold;
   }

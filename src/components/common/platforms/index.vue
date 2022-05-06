@@ -71,8 +71,7 @@ export default {
   align-items: center;
   img{
     width: auto;
-    height: 18px;
-    margin-right: 15px;
+    height: 24px;
     opacity: .7;
     &:last-child{
       margin: 0;

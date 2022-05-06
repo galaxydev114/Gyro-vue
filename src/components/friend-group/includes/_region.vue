@@ -1,7 +1,7 @@
 <template>
   <div class="col scores-container scores-container--show">
-    <div class="text-center q-mt-lg justify-center">
-      <svg xmlns="http://www.w3.org/2000/svg" :width="$q.screen.gt.lg ? 1080 : '97%'" viewBox="0 0 920 460" fill="none">
+    <div class="text-center q-mt-lg justify-center" style="overflow: auto;">
+      <svg xmlns="http://www.w3.org/2000/svg" class="map-view" viewBox="0 0 920 460" fill="none">
         <path :class="{'region--sa--hover': hoverRegion === 'SA', 'region--sa--selected': selectedRegion === 'SA'}" @click="onSelectedRegion('SA')" @mouseover="mouseOver('SA')" @mouseleave="mouseLeave()" d="M172.491 238.46H171.25C170.871 238.46 170.525 238.674 170.356 239.012L167.694 244.335C167.563 244.598 167.554 244.906 167.67 245.176L169.727 249.978C169.805 250.158 169.827 250.357 169.792 250.551L168.316 258.667C168.288 258.823 168.223 258.97 168.127 259.095L158.239 272.026C158.117 272.186 158.045 272.379 158.035 272.581L157.28 286.912C157.27 287.107 157.317 287.302 157.417 287.471L178.384 323.193C178.458 323.318 178.557 323.425 178.676 323.508L196.174 335.681C196.43 335.859 196.589 336.147 196.602 336.459L199.709 410.245C199.72 410.513 199.839 410.766 200.039 410.946L207.286 417.468C207.48 417.644 207.599 417.888 207.615 418.149L208.357 430.024C208.369 430.219 208.438 430.406 208.555 430.562L222.195 448.748C222.403 449.026 222.74 449.176 223.085 449.144L230.232 448.494C230.762 448.446 231.162 447.99 231.14 447.458L229.634 410.557C229.618 410.147 229.853 409.769 230.227 409.603L249.754 400.924C250.32 400.672 250.523 399.971 250.179 399.456L244.591 391.073C244.063 390.28 244.836 389.268 245.739 389.569L251.627 391.532C252.081 391.683 252.58 391.491 252.815 391.073L266.478 366.783C266.535 366.682 266.574 366.572 266.593 366.458L268.835 353.005C268.89 352.675 269.106 352.394 269.412 352.257L291.227 342.478C291.538 342.339 291.757 342.051 291.807 341.714L296.407 311.051C296.431 310.887 296.496 310.732 296.596 310.599L305.68 298.487C305.81 298.314 305.88 298.103 305.88 297.887V290.892C305.88 290.558 305.713 290.246 305.435 290.06L289.572 279.485C289.438 279.395 289.283 279.34 289.122 279.323L275.322 277.87C274.813 277.816 274.427 277.387 274.427 276.876V275.262C274.427 274.876 274.206 274.526 273.858 274.359C271.505 273.234 267.484 271.278 266.564 270.699C265.978 270.331 264.498 271.202 263.034 272.304C262.224 272.914 260.987 272.133 261.265 271.158L261.604 269.973C261.742 269.489 261.499 268.978 261.036 268.779L256.868 266.993C256.546 266.855 256.173 266.912 255.906 267.14C255.094 267.837 253.947 266.821 254.541 265.93L255.241 264.879C255.436 264.587 255.463 264.214 255.313 263.897L248.719 249.976C248.569 249.66 248.267 249.446 247.92 249.409L233.873 247.931C233.656 247.908 233.452 247.814 233.293 247.664L220.433 235.562C220.264 235.402 220.043 235.306 219.81 235.292L207.897 234.547C207.697 234.535 207.505 234.462 207.346 234.339C204.911 232.453 200.334 229.024 199.726 229.024H180.565C180.251 229.024 179.957 229.172 179.768 229.424L173.291 238.06C173.102 238.311 172.806 238.46 172.491 238.46Z" fill="#433558"/>
         <path :class="{'region--sa--hover': hoverRegion === 'SA', 'region--sa--selected': selectedRegion === 'SA'}" @click="onSelectedRegion('SA')" @mouseover="mouseOver('SA')" @mouseleave="mouseLeave()" d="M245.617 457.578L233.312 451.064C232.97 450.883 232.554 450.916 232.244 451.148L230.007 452.826C229.755 453.015 229.607 453.311 229.607 453.626V455.005C229.607 455.308 229.745 455.596 229.982 455.785L233.291 458.433C233.452 458.562 233.648 458.637 233.854 458.65L245.117 459.354C245.66 459.388 246.119 458.957 246.119 458.412C246.119 458.063 245.926 457.742 245.617 457.578Z" fill="#433558"/>
         <path :class="{'region--sa--title': hoverRegion === 'SA', 'title--selected': selectedRegion === 'SA'}" @click="onSelectedRegion('SA')" @mouseover="mouseOver('SA')" d="M210.298 289.313L211.882 286.57C213.466 283.826 212.433 281.151 209.129 279.243L203.423 275.949L190.823 297.773L196.466 301.031C199.771 302.939 202.791 302.604 204.375 299.861L206.445 296.275C207.417 294.592 207.608 292.748 205.887 291.339C207.758 292.128 209.398 290.872 210.298 289.313ZM205.24 281.155L207.266 282.325C208.295 282.919 208.644 283.827 207.978 284.98L206.52 287.506C205.854 288.659 204.893 288.811 203.864 288.217L201.838 287.047L205.24 281.155ZM202.937 294L201.047 297.274C200.381 298.427 199.42 298.579 198.391 297.985L196.24 296.743L200.074 290.103L202.225 291.345C203.254 291.939 203.603 292.847 202.937 294Z" fill="#25173A"/>
@@ -136,21 +136,21 @@
         <path :class="{'region--me--title': hoverRegion === 'ME', 'title--selected': selectedRegion === 'ME'}" @click="onSelectedRegion('ME')" @mouseover="mouseOver('ME')" d="M559 164.135H552.382V165.987H554.594V176.844H556.788V165.987H559V164.135Z" fill="#25173A"/>
       </svg>
     </div>
-    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center"
-      :class="{'mt-region': $q.screen.lt.sm}">
+    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center mt-fixed-bottom">
       <div class="col-6 q-px-lg-none q-pr-sm">
-        <q-btn outline
-              class="q-btn-main q-px-md btn-join-fg"
-              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.sm}"
-              color="white"
+        <c-btn outline
+              class="btn-join-fg"
+              :bold="false"
+              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.xs}"
+              color="light-pink"
               @click="$emit('previous')">
           Previous
-        </q-btn>
+        </c-btn>
       </div>
       <div class="col-6 q-px-lg-none q-pl-sm">
         <q-btn unelevated
              class="q-btn-main q-px-md btn-join-fg"
-             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.sm}"
+             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.xs}"
              color="dark-pink"
              :disable="selectedRegion === ''"
              @click="$emit('next')">
@@ -182,15 +182,25 @@ export default {
       this.hoverRegion = ''
     },
     onSelectedRegion (region) {
-      this.selectedRegion = region
+      this.$emit('selected', region)
     }
   }
 }
 </script>
 
 <style lang="scss">
-  .mt-region {
-    margin-top: calc(var(--app-height) - 500px);
+  .map-view {
+    width: 1080px;
+  }
+  @media screen and (max-width: $breakpoint-xs-max) {
+    .map-view {
+      width: 800px;
+    }
+  }
+  @media screen and (min-width: $breakpoint-xs-max) and (max-width: $breakpoint-lg-max) {
+    .map-view {
+      width: 90%;
+    }
   }
   .region {
     &--as {

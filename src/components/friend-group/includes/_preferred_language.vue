@@ -3,35 +3,35 @@
     <div class="q-mt-lg justify-center">
       <div class="row items-stretch justify-center q-my-lg">
         <div class="input-wrapper q-mt-lg" :class="{'full-width': $q.screen.lt.sm}">
-          <label class="label lbl-lang">Choose a language</label>
+          <span class="label lbl-lang">Choose a language</span>
           <q-select
             class="lbl-lang q-mt-sm text-weight-regular"
-            :class="{'full-width': $q.screen.lt.sm, 'select-lang': $q.screen.gt.sm}"
-            :value="selectedLangauge"
+            :class="{'full-width': $q.screen.lt.sm, 'select-lang': $q.screen.gt.xs}"
+            :value="selectedLanguage"
             outlined
             color="dark-pink"
-            :options="options"
+            :options="languages"
             @input="applySelectFilter"
             >
           </q-select>
         </div>
       </div>
     </div>
-    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center"
-      :class="{'mt-pref-lang': $q.screen.lt.sm}">
+    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center mt-fixed-bottom">
       <div class="col-6 q-px-lg-none q-pr-sm">
-        <q-btn outline
-              class="q-btn-main q-px-md btn-join-fg"
-              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.sm}"
-              color="white"
-              @click="$emit('chooseEnglish')">
+        <c-btn outline
+              class="btn-join-fg"
+              :bold="false"
+              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.xs}"
+              color="light-pink"
+              @click="$emit('previous')">
           Previous
-        </q-btn>
+        </c-btn>
       </div>
       <div class="col-6 q-px-lg-none q-pl-sm">
         <q-btn unelevated
              class="q-btn-main q-px-md btn-join-fg"
-             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.sm}"
+             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.xs}"
              color="dark-pink"
              @click="$emit('next')">
           Next
@@ -44,25 +44,24 @@
 <script>
 
 export default {
-  data () {
-    return {
-      options: [
-        'English', 'Spanish', 'French'
-      ],
-      selectedLangauge: 'English'
+  props: {
+    languages: {
+      type: Array,
+      default: () => []
+    },
+    selectedLanguage: {
+      type: String,
+      default: null
     }
   },
   methods: {
     applySelectFilter (value) {
-      this.selectedLangauge = value
+      this.$emit('selected', value)
     }
   }
 }
 </script>
 <style lang="scss">
-  .mt-pref-lang {
-    margin-top: calc(var(--app-height) - 470px);
-  }
   .select-lang {
     width: 300px;
     max-width: 300px;

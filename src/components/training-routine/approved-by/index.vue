@@ -6,6 +6,7 @@
     :minimal="minimal"
     :short="short"
     :label="label"
+    :size="size"
   />
 </template>
 
@@ -34,6 +35,10 @@ export default {
     label: {
       type: String,
       default: 'Approved by'
+    },
+    size: {
+      type: String,
+      default: '2rem'
     }
   },
 

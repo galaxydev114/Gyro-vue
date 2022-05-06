@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     goBack () {
-      window.location.href = 'https://novos.gg'
+      window.location.href = process.env.VUE_APP_PAGE_URL
     }
   }
 }

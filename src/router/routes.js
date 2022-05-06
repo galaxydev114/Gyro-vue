@@ -146,6 +146,37 @@ const routes = [
         ]
       },
       {
+        path: 'shared-routines/:id',
+        meta: {
+          widgetOption: 'routine',
+          fullscreen: true
+        },
+        component: () => lazyLoadView(import('layouts/SimpleLayout.vue')),
+        children: [
+          {
+            path: '',
+            meta: {
+              fullscreen: true
+            },
+            name: 'FriendGroupEventRoutine',
+            component: () => import('pages/TrainingRoutineNew'),
+            props: route => ({ friendGroupEventId: route.params.id })
+          },
+          {
+            path: 'sessions/:sessionId',
+            meta: {
+              fullscreen: true
+            },
+            name: 'FriendGroupEventSession',
+            component: () => import('pages/TrainingRoutineNew'),
+            props: route => ({
+              friendGroupEventId: route.params.id,
+              sessionId: route.params.sessionId
+            })
+          }
+        ]
+      },
+      {
         path: 'knowledge',
         meta: {
           showNotesWidget: true
@@ -379,22 +410,57 @@ const routes = [
     ]
   },
   {
-    path: '/activities',
+    path: '/courses/:id',
     component: () => import('layouts/DashboardLayout.vue'),
     meta: {
+      // TO-DO check context
+      showNotesWidget: true,
       requireLogin: true
     },
     children: [
       {
         path: '',
-        name: 'Activities',
-        component: () => lazyLoadView(import('pages/Activities'))
+        name: 'Course',
+        component: () => lazyLoadView(import('pages/Courses/index.vue')),
+        props: route => ({
+          courseId: route.params.id,
+          completedActivityId: route.query.completedActivityId
+        })
       },
       {
-        path: ':id',
-        name: 'PlayerActivities',
-        component: () => lazyLoadView(import('pages/Activities/single')),
-        props: route => ({ partnerId: route.params.id })
+        path: 'activities/:activityId',
+        meta: {
+          fullscreen: true
+        },
+        component: () => lazyLoadView(import('layouts/SimpleLayout.vue')),
+        children: [
+          {
+            path: '',
+            name: 'CourseActivity',
+            component: () => import('pages/Courses/Activity.vue'),
+            meta: {
+              fullscreen: true
+            },
+            props: route => ({
+              courseId: route.params.id,
+              activityId: route.params.activityId,
+              sessionId: route.params.sessionId
+            })
+          },
+          {
+            path: 'sessions/:sessionId',
+            name: 'CourseRoutineSession',
+            component: () => import('pages/Courses/Activity.vue'),
+            meta: {
+              fullscreen: true
+            },
+            props: route => ({
+              courseId: route.params.id,
+              activityId: route.params.activityId,
+              sessionId: route.params.sessionId
+            })
+          }
+        ]
       }
     ]
   },
@@ -650,6 +716,33 @@ const routes = [
             path: 'list',
             name: 'AdminPlatformNewsList',
             component: () => import('@/pages/Admin/PlatformNews/List')
+          }
+        ]
+      },
+      {
+        path: 'pretend',
+        component: () => import('@/layouts/SimpleLayout'),
+        children: [
+          {
+            path: '',
+            name: 'AdminPretendUser',
+            component: () => import('@/pages/Admin/PretendZone/index')
+          }
+        ]
+      },
+      {
+        path: 'friend-groups',
+        component: () => import('@/layouts/SimpleLayout'),
+        children: [
+          {
+            path: '',
+            name: 'AdminFriendGroups',
+            component: () => import('@/pages/Admin/FriendGroups/FriendGroupsList')
+          },
+          {
+            path: 'applications',
+            name: 'AdminUserFriendGroupApplications',
+            component: () => import('@/pages/Admin/FriendGroups/UserFriendGroupApplicationsList')
           }
         ]
       }

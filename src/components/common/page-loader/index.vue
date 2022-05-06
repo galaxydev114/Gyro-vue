@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, .6);
-  z-index: 9999;
+  z-index: 15960;
   backdrop-filter: blur(2px);
 }
 </style>

@@ -87,7 +87,7 @@
           EXCLUSiVE
         </div>
         <!--      Level on mobile-->
-        <div class="q-mb-md" v-if="isResponsive">
+        <div class="q-mb-md" v-if="isResponsive && !isMobile">
           <n-difficulty :difficulty="difficulty"/>
         </div>
         <!--      Category name and time-->
@@ -115,19 +115,45 @@
         <div class="q-mt-sm paragraph-medium" v-if="subtitle">
           {{ subtitle }}
         </div>
-        <!--      Author and level-->
-        <div class="flex items-center q-mt-sm q-mt-md-lg">
-          <div class="" data-intercom-target="approved_by">
-            <approved-by :author="author" :minimal="isResponsive" />
+        <!--      Shared event -->
+        <div class="flex items-center q-mt-lg q-mt-md-xl" v-if="isShared">
+          <div class="row full-width q-pb-lg items-center">
+            <c-btn @click="$emit('subscribe-to-event')" noWidth v-if="!isUserGoing">
+              <c-icon icon="bell" class="q-mr-sm" />
+              <span class="q-mr-sm" >Going</span>
+            </c-btn>
+            <c-btn @click="$emit('unsubscribe-from-event')" noWidth outline v-else>
+              <c-icon icon="check" width="14px" class="q-mr-sm" />
+              <span class="q-mr-sm" >Going</span>
+            </c-btn>
           </div>
-          <template v-if="!isResponsive">
-            <div class="vertical-line q-mx-md"></div>
-            <div class="">
+          <div class="row full-width items-center justify-between">
+            <n-members-going :members="members"/>
+            <template v-if="!isResponsive || isMobile">
+              <div class="vertical-line q-mx-md" style="height: 35px"></div>
               <n-difficulty :difficulty="difficulty"/>
-            </div>
+            </template>
+          </div>
+          <template v-if="members && members.length">
+            <div class="horizontal-line q-my-lg"></div>
+            <n-members-list :members="members" />
           </template>
         </div>
-        <div class="horizontal-line q-my-xl"></div>
+        <!--      Author and level-->
+        <template v-else>
+          <div class="flex items-center q-mt-sm q-mt-md-lg">
+            <div class="" data-intercom-target="approved_by">
+              <approved-by :author="author" :minimal="isResponsive" />
+            </div>
+            <template v-if="!isResponsive">
+              <div class="vertical-line q-mx-md"></div>
+              <div class="">
+                <n-difficulty :difficulty="difficulty"/>
+              </div>
+            </template>
+          </div>
+        </template>
+        <div class="horizontal-line q-my-lg"></div>
         <!--      Timer on mobile-->
         <template v-if="isResponsive && sessionTimerDuration">
           <n-timer :seconds="sessionTimerDuration * 60"
@@ -139,7 +165,7 @@
           <div class="horizontal-line q-my-xl"></div>
         </template>
         <!--      Instructions-->
-        <template v-if="isSingleSession || isSession" >
+        <template v-if="videoUrl && (isSingleSession || isSession)" >
           <div class="text-h4 text-gray">
             Instructions
           </div>
@@ -161,7 +187,7 @@
           </div>
         </template>
         <!--      Tips-->
-        <template v-if="notes && notes.length">
+        <template v-if="videoUrl && notes && notes.length">
           <div class="q-mt-md q-mt-md-xl text-gray">
             <div class="text-h4 flex items-center">
               <c-icon icon="tip" class="q-mr-sm" />
@@ -189,7 +215,7 @@
                                  minimal
                                  @click="$emit('click-playlist')"/>
             </div>
-            <div class="q-mt-md full-width" v-else-if="computedMap">
+            <div class="q-mt-md full-width" v-else-if="shouldShowMap">
               <n-creative-map
                 minimal
                 :title="computedMap.title"
@@ -384,7 +410,54 @@
           />
         </div>
       </div>
-      <div class="media-container-fake" v-if="!videoUrl"></div>
+      <div class="text-container" v-if="!videoUrl">
+        <div class="text-container__content">
+          <div class="text-h2 q-pb-xl">
+            {{ title }}
+          </div>
+          <div v-html="content" class="q-pb-xl"></div>
+          <!--      Instructions-->
+          <template v-if="isSingleSession || isSession" >
+            <div class="text-h4 text-gray">
+              Instructions
+            </div>
+            <div class="paragraph-small opacity-75 q-mt-sm text-gray">
+              Follow the steps bellow to complete this session
+            </div>
+            <div class="items-list">
+              <div class="items-list__item text-gray"
+                   v-for="(step, i) in singleSession.steps"
+                   :key="`step-${i}`">
+                <div class="text-pink q-mb-sm" style="font-size: 12px">
+                  STEP {{ i + 1 }}
+                </div>
+                <div class="text-h4 q-mb-xs">
+                  {{ step.title }}
+                </div>
+                <div class="paragraph-medium" v-html="step.description"></div>
+              </div>
+            </div>
+          </template>
+          <!--      Tips-->
+          <template v-if="notes && notes.length">
+            <div class="tips-block q-mt-md q-mt-md-xl text-gray">
+              <div class="text-h4 flex items-center">
+                <c-icon icon="tip" class="q-mr-md" />
+                Tips
+              </div>
+              <div class="paragraph-small opacity-75 q-mt-sm" style="padding-left: 36px" v-html="notesSubtitle"/>
+              <div class="items-list" style="padding-left: 36px">
+                <div class="items-list__item"
+                     v-for="(note, i) in notes"
+                     :key="`note-${i}`">
+                  <div v-html="note"></div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
       <div class="activity-page__content-part">
         <div class="row q-col-gutter-md items-stretch">
           <div class="col-6 col-md-4" v-if="sessionTimerDuration">
@@ -406,7 +479,7 @@
                                :name="computedKovaakName"
                                @click="$emit('click-playlist')"/>
           </div>
-          <div class="col-6 col-md-4" v-else-if="sessionId ? computedMap : shouldShowMap">
+          <div class="col-6 col-md-4" v-else-if="shouldShowMap">
             <n-creative-map
               :title="computedMap.title"
               :tooltipDescription="computedMap.tooltipDescription"
@@ -450,7 +523,7 @@
           {{ isSession ? duration : computedRoutineDuration }} minutes
         </div>
       </div>
-      <div class="progress text-center">
+      <div class="progress text-center" v-if="!nonCompletable">
         <div class="font-rift text-subtitle text-weight-bold text-uppercase opacity-25">
           ACTIVITY PROGRESS
         </div>
@@ -508,7 +581,7 @@
           </c-btn>
           <c-btn noWidth
                  :dense="$q.screen.lt.sm"
-                 v-else-if="isRoutineCompleted"
+                 v-else-if="isRoutineCompleted || nonCompletable"
                  @click="goBack"
                  class="q-ml-sm">
             <span class="q-px-sm q-px-sm-none">Go Back</span>
@@ -715,6 +788,18 @@ export default {
     currentSessionScore: {
       type: Number,
       default: null
+    },
+    nonCompletable: {
+      type: Boolean,
+      default: false
+    },
+    participants: {
+      type: Array,
+      default: () => []
+    },
+    isUserGoing: {
+      type: Boolean,
+      default: false
     }
   },
   watch: {
@@ -739,7 +824,9 @@ export default {
     'n-kovaak-playlist': () => import('@/components/training-routine-new/kovaak-playlist'),
     'n-creative-map': () => import('@/components/training-routine-new/creative-map'),
     'n-routine-mastery': () => import('./routine-mastery'),
-    'n-tracking-progress': () => import('@/components/tracking-progress')
+    'n-tracking-progress': () => import('@/components/tracking-progress'),
+    'n-members-list': () => import('@/components/members-list'),
+    'n-members-going': () => import('@/components/members-going')
   },
   data () {
     return {
@@ -751,11 +838,18 @@ export default {
 
       animationReference: null,
       isAnimationPlaying: false,
-      trackingData: []
+      trackingData: [],
+      toggledMembersList: false
     }
   },
   mixins: [urlTypes],
   computed: {
+    members () {
+      return this.participants?.map(participant => ({
+        name: participant.discordUserName,
+        avatar: participant.avatarUrl
+      })) || []
+    },
     isInitialActive () {
       return Boolean(this.isDone) || this.trainingSessionStats.dailyAttemptsCompleted > 0
     },
@@ -829,9 +923,12 @@ export default {
     },
     shouldShowMap () {
       const firstMap = this.computedMap
-      if (!firstMap?.mapCode || !firstMap?.mapImgSrc) return false
-      const filteredSessions = this.sessions.filter(session => session?.map?.mapCode === firstMap.mapCode)
-      return filteredSessions.length === this.sessions.length
+      if (!firstMap?.mapCode || (firstMap?.mapCode === '0000-0000-0000')) return false
+      return true
+    },
+    isShared () {
+      const { name } = this.$route
+      return name && name.includes('FriendGroup')
     }
   },
   methods: {
@@ -1125,12 +1222,46 @@ export default {
         position: relative;
         height: 100%;
       }
-      &-fake{
-        width: 100%;
-        min-height: 300px;
-        background-image: url('../../assets/trainingRoutine/routine-title-background.png');
-        background-size: cover !important;
-        display: block
+    }
+    .text-container{
+      height: calc( 100% - 200px);
+      background-color: $dark-sec;
+      padding: 80px 0 40px;
+      overflow: auto;
+      &__content{
+        display: block;
+        margin: 0 auto;
+        max-width: 650px;
+        width: 90%;
+        img{
+          display: block;
+          margin: 25px auto;
+          width: 90%;
+          max-width: 450px;
+        }
+        .items-list__item{
+          padding: 25px 0;
+          border: none;
+        }
+        .tips-block{
+          background: $mid-tone;
+          padding: 20px;
+          .items-list__item{
+            padding: 12px 0 12px 24px;
+            position: relative;
+            &:before{
+              content: "";
+              width: 5px;
+              height: 5px;
+              position: absolute;
+              left: 6px;
+              top: 20px;
+              border-radius: 100%;
+              display: block;
+              background: #fff;
+            }
+          }
+        }
       }
     }
     &-part{
@@ -1270,6 +1401,10 @@ export default {
       height: 100%;
     }
 
+    .text-container{
+      height: 100%;
+    }
+
     .activity-menu{
       width: 100%;
       z-index: 9999;
@@ -1328,6 +1463,10 @@ export default {
           }
         }
       }
+    }
+
+    .text-container{
+      padding: 20px 0;
     }
 
     .activity-menu{

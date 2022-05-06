@@ -105,7 +105,7 @@
               </c-explainer>
             </header>
             <div class="charts">
-              <div class="win-ratio-chart">
+              <div class="win-ratio-chart overflow-hidden">
                 <q-resize-observer @resize="keys.skillScoreChart++" />
                 <div class="block">
                   <c-empty v-if="!isPageReady || !skillScoreChart"
@@ -114,10 +114,13 @@
                   />
                   <template v-else>
                     <div class="row align-center full-height">
-                      <div class="skill-score-left col-12 col-lg-4 q-mb-sm q-mb-sm-none">
-                        <c-skill-score-widget v-bind="skillScoreWidgetData" />
+                      <div class="skill-score-left-new col-12 col-lg-4 q-mb-sm q-mb-sm-none">
+                        <speedometer :showPro="false" :animated="false" v-bind="skillScoreWidgetData" class="q-mt-sm-lg" />
                       </div>
-                      <div class="skill-score-right col-12 col-lg-8 q-py-md q-px-md-sm">
+                      <div class="skill-score-right-new col-12 col-lg-8 q-py-md q-px-md-sm">
+                        <div class="text-h4 q-mb-md">
+                          Your score
+                        </div>
                         <c-single-chart
                           title=""
                           description="Skill score calculated by Kinch Analytics"
@@ -132,7 +135,7 @@
                           :timeView="timeView"
                           :isPageReady="isPageReady"
                           :showEmptyState="false"
-                          :chartStyle="'height: 32vh; max-height: 345px;'"
+                          :chartStyle="'height: 32vh; max-height: 250px;'"
                           :dashed="skillScoreWidgetData.isPredicted"/>
                       </div>
                     </div>
@@ -347,14 +350,14 @@ export default {
     'c-cat-list': () => import('@/components/progress/categories-list'),
     'c-week': () => import('@/components/progress/week'),
     'c-play-calendar': () => import('@/components/progress/calendar'),
-    'c-skill-score-widget': () => import('./_skill-score-widget'),
     // 'c-timeline-chart': () => import('components/common/timeline-chart-v2.vue'),
     // 'c-column-chart': () => import('./_column-chart.vue'),
     'c-arena-placement-chart': () => import('./_arena-placement-chart.vue'),
     'c-single-chart': () => import('./_single-chart.vue'),
     'c-empty': () => import('@/components/progress/_empty'),
     'c-explainer': () => import('@/components/progress/_explainer'),
-    'c-tracking-chart': () => import('./_tracking-chart')
+    'c-tracking-chart': () => import('./_tracking-chart'),
+    speedometer: () => import('@/components/speedometer')
   },
   data () {
     return {
@@ -464,15 +467,18 @@ export default {
 
           chart = sessionsProgress
             .map((progress, i) => {
+              const initialScore = progress.isScoreInversed ? Math.max(...progress.scores.map(e => e.score)) : 0
               return {
                 title: progress.sessionTitle,
                 color: colors[i] ? colors[i] : colors[0],
+                isScoreInversed: progress.isScoreInversed,
+                isScoreTime: progress.isScoreTime,
                 isPredicted: progress.isPredicted,
                 yAxisID: `y${i}`,
                 values: dates
                   .map(date => ({
                     x: date,
-                    y: progress.scores?.find(el => el.date === date)?.score || 0
+                    y: progress.scores?.find(el => el.date === date)?.score || initialScore
                   }))
               }
             })
@@ -562,13 +568,12 @@ export default {
     },
 
     getSkillScoreRank (score) {
+      // TODO - check if okay
       if (score === 0) {
         return 'Beginner'
       } else if (score === 400) {
-        return 'Intermediate'
-      } else if (score === 800) {
         return 'Advanced'
-      } else if (score === 1200) {
+      } else if (score === 1000) {
         return 'Pro'
       }
     },
@@ -750,6 +755,16 @@ export default {
 }
 
 .skill-score {
+  @media (min-width: 1360px) {
+    &-left-new {
+      height: auto;
+      width: 280px;
+    }
+    &-right-new {
+      height: auto;
+      width: calc(100% - 280px);
+    }
+  }
   @media (min-width: $breakpoint-tablet-min) and (max-width: $breakpoint-md-max) {
     &-left {
       height: auto;
@@ -758,6 +773,14 @@ export default {
     &-right {
       height: auto;
       width: 58%;
+    }
+    &-left-new {
+      height: auto;
+      width: 280px;
+    }
+    &-right-new {
+      height: auto;
+      width: calc(100% - 280px);
     }
   }
   @media (min-width: $breakpoint-md-min) and (max-width: $breakpoint-tablet-max) {

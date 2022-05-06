@@ -82,6 +82,13 @@ export default {
           }
         },
         {
+          label: 'Is Discoverable',
+          field: this.castIsDiscoverableToString,
+          filterOptions: {
+            enabled: true
+          }
+        },
+        {
           label: 'Actions',
           field: 'actions'
         }
@@ -118,6 +125,9 @@ export default {
     },
     castIsPublishedToString (obj) {
       return String(obj.isPublished)
+    },
+    castIsDiscoverableToString (obj) {
+      return String(obj.isDiscoverable)
     }
   }
 }

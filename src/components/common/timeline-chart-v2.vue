@@ -1,5 +1,5 @@
 <template>
-  <LineChart ref="chartRef" :style="chartStyle" :chartData="chartJSChartData" :options="options" />
+  <LineChart ref="chartRef" :style="chartStyle" :chartData="chartJSChartData" :options="options"/>
 </template>
 
 <script>
@@ -11,7 +11,9 @@ import { LineChart } from 'vue-chart-3'
 
 export default {
   name: 'TimelineChart',
-  components: { LineChart },
+  components: {
+    LineChart
+  },
   data () {
     return {
       chartInstance: null,
@@ -61,6 +63,10 @@ export default {
       default: ''
     },
     dashed: {
+      type: Boolean,
+      default: false
+    },
+    reverse: {
       type: Boolean,
       default: false
     }
@@ -131,6 +137,7 @@ export default {
             }
           },
           y: {
+            reverse: this.reverse,
             max: this.max,
             min: this.min,
             ticks: {
@@ -173,7 +180,6 @@ export default {
           }
         }
       }
-
       if (this.data.yAxisIDs?.length) {
         const { yAxisIDs } = this.data
         yAxisIDs.forEach((type, idx) => {
@@ -222,6 +228,7 @@ export default {
         datasets: this.data.charts?.map((el, idx) => {
           const datasetData = el.values
           const hasUncertainVals = Boolean(datasetData.find(el => el.uncertain))
+          const hasMulticolorLine = Boolean(datasetData.find(el => el.multicolorLineColor))
 
           const data = {
             label: el.title,
@@ -233,8 +240,18 @@ export default {
             yAxisID: el.yAxisID ?? 'y'
           }
 
-          if (hasUncertainVals) {
+          if (hasMulticolorLine) {
             data.segment = {
+              borderColor: (ctx) => ctx.p1.raw.multicolorLineColor
+            }
+          }
+
+          if (hasUncertainVals) {
+            if (!data.segment) {
+              data.segment = {}
+            }
+            data.segment = {
+              ...data.segment,
               borderDash: (ctx) => ctx.p1.raw.uncertain ? [6, 4] : []
             }
           }
@@ -242,7 +259,7 @@ export default {
           if (el.fillColor) {
             data.backgroundColor = el.fillColor
             data.fill = {
-              target: idx === 0 ? 'origin' : idx - 1
+              target: idx === 0 ? (this.reverse ? 'start' : 'origin') : idx - 1
             }
 
             if (el.isGradient) {

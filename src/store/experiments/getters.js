@@ -15,14 +15,14 @@ export const experimentActive = (state, getters) => experimentId => {
   }
 }
 
-export const experimentGyroOnboardingGoal = (state, getters) => {
-  return getters.experimentActive('GYRO_ONBOARDING_GOAL')
-}
-
 export const experimentGyroForceLinkEpic = (state, getters) => {
   return getters.experimentActive('GYRO_FORCE_LINK_EPIC')
 }
 
-export const experimentIsFirstBoardViewExperiment = (state, getters) => {
-  return getters.experimentActive('GYRO_IS_FIRST_BOARD_VIEW')
+export const experimentCourses = (state, getters) => {
+  return getters.experimentActive('GYRO_COURSES')
+}
+
+export const isNewOnboardingVideo = (state, getters) => {
+  return getters.experimentActive('GYRO_IS_NEW_ONBOARDING_VIDEO')
 }

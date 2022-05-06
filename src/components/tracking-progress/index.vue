@@ -35,7 +35,7 @@
                   current score
                 </div>
                 <div class="text-h4 text-center q-mt-sm">
-                  {{submittedScore || '-'}}
+                  {{localSubmittedScore || '-'}}
                 </div>
               </div>
               <div class="column q-ml-sm q-sm-ml-md">
@@ -80,6 +80,8 @@
             :externalTooltipHandler="handleTooltipUpdate"
             :chartStyle="'height: 100%;'"
             :data="chartData"
+            :yLabelHandler="data.isScoreTime ? getValueText : null"
+            :reverse="data.isScoreInversed"
             class="tracking-progress__modal-chart"
           />
           <c-empty style="height: 100%; min-height: unset;"
@@ -113,7 +115,7 @@
 </template>
 
 <script>
-import dayjs from 'dayjs'
+import { durationStrFromSec } from '@/util/time'
 
 export default {
   props: {
@@ -169,7 +171,7 @@ export default {
         tooltipData = tooltip.body.map((el, index) => {
           return {
             color: tooltip.labelColors[index].borderColor,
-            dataTitle: el.lines[0]
+            dataTitle: this.data.isScoreTime ? durationStrFromSec(tooltip.dataPoints[index].raw.y) : el.lines[0]
           }
         })
       }
@@ -184,6 +186,9 @@ export default {
       this.tooltipTitle = this.$date(tooltip.title[0]).format('MMMM DD') +
         (tooltip.beforeBody.length ? `, ${tooltip.beforeBody} games played` : '')
       this.tooltipData = tooltipData
+    },
+    getValueText (value) {
+      return durationStrFromSec(value)
     }
   },
   computed: {
@@ -197,12 +202,13 @@ export default {
         if (new Date(a.date) > new Date(b.date)) return 1
         return -1
       })
-      const date = dayjs(sortedScores[0].date)
+      const initialScore = this.data.isScoreInversed ? Math.max(...scores.map(e => e.score)) : 0
+      const date = this.$dayjs(sortedScores[0].date)
         .subtract(1, 'day')
         .format('MM/DD/YYYY')
       sortedScores.unshift({
         date,
-        score: 0
+        score: initialScore
       })
 
       const labelsArray = sortedScores.map(el => el.date)
@@ -231,11 +237,11 @@ export default {
     dailyAttemptsRequested () {
       return this.data?.sessionCounter
     },
-    lastScore () {
-      return this.data?.lastScore
+    localSubmittedScore () {
+      return this.data.isScoreTime ? durationStrFromSec(this.submittedScore) : this.submittedScore?.toFixed(2)
     },
     todayScore () {
-      return this.data?.todayScore?.toFixed(2)
+      return this.data.isScoreTime ? durationStrFromSec(this.data?.todayScore) : this.data?.todayScore?.toFixed(2)
     }
   },
   watch: {

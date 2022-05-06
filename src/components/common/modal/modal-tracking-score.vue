@@ -12,9 +12,22 @@
         </div>
         <div class="q-my-lg">
           <div class="text-h5 text-weight-bold text-gray text-left q-mb-sm">
-            Score
+            {{isScoreTime ? 'Time (mm:ss)' : 'Score'}}
           </div>
           <q-input
+            v-if='isScoreTime'
+            outlined
+            clearable
+            @click="trackSubmitScoreAction('player type answer')"
+            mask='time'
+            fill-mask
+            class="full-width no-arrow-input"
+            placeholder="Enter score"
+            v-model="score"
+          >
+          </q-input>
+          <q-input
+            v-else
             outlined
             clearable
             @click="trackSubmitScoreAction('player type answer')"
@@ -27,7 +40,7 @@
         </div>
 
         <div class="block q-mt-sm">
-          <c-btn class="q-mb-sm" @click="trackSubmitScoreAction('player submit score', { score }); $emit('score', score)">
+          <c-btn class="q-mb-sm" @click="handleSubmitScore">
             SUBMIT YOUR SCORE
           </c-btn>
           <c-btn v-if="providedScore === 0 || !providedScore" outline @click="handleSkip">
@@ -61,6 +74,8 @@
 </template>
 
 <script>
+import { durationStrFromSec } from '@/util/time'
+
 export default {
   props: {
     visible: {
@@ -70,6 +85,10 @@ export default {
     providedScore: {
       type: Number,
       default: null
+    },
+    isScoreTime: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -82,6 +101,17 @@ export default {
     }
   },
   methods: {
+    handleSubmitScore () {
+      if (this.isScoreTime) {
+        const splittedScore = this.score.split(':')
+
+        const seconds = (+splittedScore[0]) * 60 + (+splittedScore[1])
+
+        this.score = seconds
+      }
+      this.trackSubmitScoreAction('player submit score', { score: this.score })
+      this.$emit('score', this.score)
+    },
     trackAction () {
       this.$emit('analytics', ...arguments)
     },
@@ -105,7 +135,11 @@ export default {
     providedScore: {
       immediate: true,
       handler (value) {
-        this.score = value
+        if (this.isScoreTime) {
+          this.score = durationStrFromSec(value)
+        } else {
+          this.score = value
+        }
       }
     }
   }

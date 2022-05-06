@@ -1,9 +1,12 @@
+import { capitalize } from 'lodash'
+import { fgRegionsMap, languages } from '@/constants'
+
 export const isLoggedIn = (state) => !!state.currentUser
 
 export const currentUser = (state) => state.currentUser
 
 export const currentUserComputedName = (state) => {
-  return state.currentUser ? (state.currentUser.fortniteNickname || state.currentUser.email.split('@')[0]) : ''
+  return state.currentUser ? (state.currentUser.fortniteNickname || state.currentUser.email?.split('@')[0]) : ''
 }
 
 export const skillsPriorityArray = (state) => {
@@ -125,4 +128,90 @@ export const userActivitiesCount = (state) => {
 
 export const isAllowedToUsePlatform = (state) => {
   return trialDaysLeft(state) > 0 || isPaidUser(state) || isPaymentDemoUser(state)
+}
+
+export const userDiscordData = (state) => {
+  return state.discordData
+}
+
+export const userDiscordTokenValid = (state) => {
+  return new Date(state.discordData?.accessTokenValidTill) > new Date()
+}
+
+export const userFriendGroupApplicationId = (state) => {
+  return state.userFriendGroupApplication.id
+}
+
+export const getJoinFGState = (state) => {
+  return 'hasJoin'
+  // if (!state.userFriendGroupApplication) {
+  //   return 'findJoin'
+  // } else if (state.userFriendGroupApplication?.processingStatus === 'admin_pending') {
+  //   return 'waitingForGroupAdmin'
+  // } else if (state.userFriendGroupApplication?.processingStatus === 'auto_pending') {
+  //   return 'waitingForGroupAuto'
+  // } else if (state.userFriendGroupApplication?.joinDate) {
+  //   return 'hasJoin'
+  // } else if (state.userFriendGroupApplication?.friendGroupId) {
+  //   return 'canJoin'
+  // }
+  // TODO - logic to be finished according to design states
+  // findJoin, hasJoin, canJoin, noJoin, waitingForGroupAuto, waitingForGroupAdmin
+}
+
+const getScoreString = (score) => {
+  const maxScore = 1200
+  if (score < 0.25 * maxScore) {
+    return 'Beginner'
+  } else if (score < 0.87 * maxScore) {
+    return 'Advanced'
+  } else if (score < 750) {
+    return 'PRO'
+  }
+}
+
+export const userFriendGroupPreferences = (state) => {
+  if (!state.userFriendGroupApplication) {
+    return {}
+  } else {
+    const { platform, availability, region, language } = state.userFriendGroupApplication
+    return {
+      language: languages.getLangNameForCode(language),
+      platform: capitalize(platform),
+      skillScore: getScoreString(currentUserScore(state)),
+      availability: availability && (availability?.length > 1 ? 'Flexible' : capitalize(availability[0])),
+      region: fgRegionsMap[region]
+    }
+  }
+}
+
+export const userFriendGroupCriteria = (state) => {
+  if (!state.userFriendGroup) {
+    return {}
+  } else {
+    const { platform, availability, region, language, skillScoreMax } = state.userFriendGroup?.criteria
+    return {
+      language: languages.getLangNameForCode(language),
+      platform: capitalize(platform),
+      skillScore: getScoreString(skillScoreMax),
+      availability: capitalize(availability),
+      region: fgRegionsMap[region]
+    }
+  }
+}
+
+export const userFriendGroupInfo = (state) => {
+  return {
+    ...userFriendGroupCriteria(state),
+    name: state.userFriendGroup?.name,
+    url: state.userFriendGroup?.url
+  }
+}
+
+export const userFriendGroup = (state) => {
+  return state.userFriendGroup
+}
+
+export const userFriendGroupSelection = (state) => {
+  return state.userFriendGroupApplication
 }

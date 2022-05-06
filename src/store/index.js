@@ -21,9 +21,10 @@ import updates from './updates'
 import progress from './progress'
 import collaborators from './collaborators'
 import fortniteSeason from './fortnite-season'
+import courses from './courses'
+import friendGroups from './friend-groups'
 
 Vue.use(Vuex)
-
 /*
  * If not building with SSR mode, you can
  * directly export the Store instantiation
@@ -51,7 +52,9 @@ export default function (/* { ssrContext } */) {
       updates,
       progress,
       collaborators,
-      fortniteSeason
+      fortniteSeason,
+      courses,
+      friendGroups
     },
 
     // enable strict mode (adds overhead!)

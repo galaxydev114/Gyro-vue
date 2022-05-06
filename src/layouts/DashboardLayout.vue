@@ -50,15 +50,8 @@
             </div>
           </div>
 
-          <div v-if="!$q.screen.lt.md && currentUser" class="text-no-wrap">
-            <c-btn class="q-pr-lg" color="indigo">
-              <router-link
-                to="/friend-group"
-                class="fg-join-btn-link"
-                >
-                  Join a Friends Group
-              </router-link>
-            </c-btn>
+          <div v-if="!$q.screen.lt.sm && currentUser" class="text-no-wrap  q-mr-lg-lg q-mr-md-md">
+            <join-btn :state="joinFGButtonState" :firstJoined="showJoinedTooltip" @click="setShowFgStatePopup(true)"/>
           </div>
 
           <div v-if="!$q.screen.lt.md && currentUser" class="text-no-wrap float-right">
@@ -92,15 +85,15 @@
                 @click="avatarClick"
               />
               <div class="user-mobile-nav shadow-4" v-if="drop">
+                <div class="user-mobile-nav__item" style="background:#594FE3;"
+                    @click="setShowFgStatePopup(true)"
+                    v-if="isHideFGBtn">
+                  {{ joinFGButtonState === 'findJoin' ? 'Find a Friends Group': 'Join Friends Group'}}
+                </div>
                 <div class="user-mobile-nav__item"
                     v-if="!isPaidUser"
                     @click="setPayWallMethod(`upgrade ${trialDaysLeft > 0 ? 'before' : 'after'} finish trial`, 'upgrade Click', true)">
                   Upgrade
-                </div>
-                <div class="user-mobile-nav__item"
-                    @click="onJoinFriend"
-                    v-if="$q.screen.lt.sm">
-                  Join a Friends Group
                 </div>
                 <div class="user-mobile-nav__item"
                     @click="showSubscriptionModal"
@@ -175,7 +168,7 @@
               :pointer="isAllowedToUsePlatform || $q.screen.lt.md"
               :emailAddress="currentUser.email"
               :userName="currentUser.fortniteNickname"
-              :size=92
+              :size="92"
             />
             <div class="q-my-lg text-center">
               <div class="text-h4 text-weight-bold">
@@ -186,6 +179,9 @@
               </div>
             </div>
           </template>
+        </div>
+        <div v-if="$q.screen.lt.sm" class="q-mb-lg">
+          <join-btn :state="joinFGButtonState" :firstJoined="showJoinedTooltip" @click="setShowFgStatePopup(true)"/>
         </div>
         <div class="n-dashboard-nav">
           <div @click="leftBarItemClick('plan')" class="q-mb-md">
@@ -404,8 +400,67 @@
         @show-referrals="trackAction('Referrals: Click from subscription details'); setShowModalReferrals(true)"
         @close="setShowUserSubscriptions(false)"
         @cancelSubscription="confirmCancelSubscription"
+        @resumeSubscription="resumeSubscription"
         @open-support="setShowUserSubscriptions(false); showSupport = true"
       />
+
+      <!-- friend group modal -->
+      <modal-fg-enjoy
+        :visible="joinFGButtonState === 'hasJoin' && showFgStatePopup"
+        :friendGroupInfo="userFriendGroupInfo"
+        @findAnotherFg="findAnotherFG"
+        @leaveFg="setShowFgLeave(true)"
+        @close="setShowFgStatePopup(false)"
+      />
+
+      <modal-fg-leave-confirm
+        :visible="showModalFgLeave"
+        @leave="setShowFgLeave(false); setShowModalFgLeaveReason(true)"
+        @close="setShowFgLeave(false)"
+      />
+
+      <modal-leave-reason
+        :visible="showModalFgLeaveReason"
+        @close="setShowModalFgLeaveReason(false)"
+        @submit="onUserSubmitLeaveFG"
+      />
+
+      <modal-fg-can-join
+        :visible="joinFGButtonState === 'canJoin' && showFgStatePopup"
+        :friendGroupInfo="userFriendGroupInfo"
+        @changePrefs="startFriendGroupApplicationFlow"
+        @joinFg="joinFG"
+        @close="setShowFgStatePopup(false)"
+      />
+
+      <modal-fg-find
+        :visible="(joinFGButtonState === 'waitingForGroupAuto' && showFgStatePopup)"
+        :preferences="userFriendGroupPreferences"
+        :isWaitingForAdmin="joinFGButtonState === 'waitingForGroupAdmin'"
+        @cancel="removeFG"
+        @passAdmin="passAdmin"
+        @close="setShowFgStatePopup(false)"
+      />
+
+      <modal-fg-introduction
+        :visible="joinFGButtonState === 'findJoin' && showFgStatePopup"
+        :preferences="userFriendGroupPreferences"
+        :linkedDS="userDiscordTokenValid"
+        @finished="onIntroFinished"
+        @close="setShowFgStatePopup(false)"
+      />
+
+      <modal-discord-link
+        :visible="showModalDiscordLink"
+        :linkDiscordUrl="linkDiscordUrl"
+        @close="hideDiscordLinkModal"
+      />
+
+      <modal-fg-joined
+        :visible="showModalJoinedSuccess"
+        @close="hideJoinedSuccessModal"
+      />
+      <!-- Friend Group Modal -->
 
       <modal-referrals
         v-if="isInReferralProgram"
@@ -462,6 +517,7 @@
       <n-notes v-if="notesWidgetAvailable && ($q.screen.gt.xs || !leftDrawerOpen)" />
 
       <modal-tracking-question @confirm="onConfirmTrackingModal" :visible="showModalTracking" />
+
     </q-page-container>
 
     <q-drawer
@@ -476,6 +532,7 @@
         <slot name="right" />
       </q-scroll-area>
     </q-drawer>
+    <page-loader v-if="showLoader" />
   </q-layout>
   <q-layout v-else view="lHh Lpr lFf"
             class="n-dashboard-collaboartor"
@@ -496,11 +553,13 @@
 <script>
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex'
 import { Fireworks } from 'fireworks-js'
+import { getLocalstorage, removeLocalstorage } from '@/services/localstorageservice'
 import paymentMixin from '@/mixins/payment.mixin'
 import SkillIcons from '@/components/common/skill-icons-manager'
 
 export default {
   components: {
+    'page-loader': () => import('@/components/common/page-loader'),
     'oops-modal': () => import('@/components/dashboard/modal/modal-oops'),
     'user-avatar': () => import('@/components/common/user-avatar'),
     'n-feedback': () => import('@/components/common/feedback'),
@@ -515,7 +574,16 @@ export default {
     'modal-upgrade': () => import('@/components/payment/modal/modal-upgrade.vue'),
     'modal-sign-up': () => import('@/components/common/modal/modal-sign-up.vue'),
     'modal-tracking-question': () => import('@/components/common/modal/modal-tracking-question.vue'),
-    'modal-platform-news': () => import('components/common/modal/modal-platform-news')
+    'modal-platform-news': () => import('components/common/modal/modal-platform-news'),
+    'modal-fg-enjoy': () => import('@/components/friend-group/modal/modal-enjoy'),
+    'modal-fg-leave-confirm': () => import('@/components/friend-group/modal/modal-leave'),
+    'modal-fg-can-join': () => import('@/components/friend-group/modal/modal-can-join'),
+    'modal-fg-find': () => import('@/components/friend-group/modal/modal-find-fg'),
+    'modal-discord-link': () => import('@/components/friend-group/modal/modal-link-discord'),
+    'modal-fg-introduction': () => import('@/components/friend-group/modal/modal-fg-introduction'),
+    'modal-leave-reason': () => import('@/components/friend-group/modal/modal-leave-reason'),
+    'modal-fg-joined': () => import('@/components/friend-group/modal/modal-fg-joined'),
+    'join-btn': () => import('@/components/friend-group/join-btn')
   },
   mixins: [paymentMixin],
   props: {
@@ -541,7 +609,16 @@ export default {
       referralsData: null,
       isModalCheckoutVisible: false,
       isOopsModalVisible: false,
-      fireworks: null
+      fireworks: null,
+      showModalFgLeave: false,
+      showModalFgLeaveReason: false,
+      showModalDiscordLink: false,
+      showModalJoinedSuccess: false,
+      showFgStatePopup: false,
+      showJoinedTooltip: true,
+      showLoader: false, // TODO - check if can use pageLoaded
+      discordOauthState: {},
+      isHideFGBtn: false
     }
   },
   created () {
@@ -558,6 +635,8 @@ export default {
     }, 1500)
   },
   mounted () {
+    this.doDiscordOauth2(this.$route.query)
+
     if (this.currentUser) {
       this.getPlatformUpdates()
     }
@@ -577,6 +656,9 @@ export default {
       this.joinReferralProgram(this.currentUser.id)
         .then(() => this.setShowModalReferrals(true))
     }
+    if (this.$route.query.friendGroups === 'true') {
+      this.setShowFgStatePopup(true)
+    }
   },
   computed: {
     ...mapGetters({
@@ -587,14 +669,31 @@ export default {
       subscriptionPaymentMode: 'payments/userSubscriptionPaymentMode',
       showModalUpgrade: 'payments/showPaywall',
       showModalSubscriptions: 'payments/showUserSubscriptions',
-      isAllowedToUsePlatform: 'user/isAllowedToUsePlatform'
+      isAllowedToUsePlatform: 'user/isAllowedToUsePlatform',
+      joinFGButtonState: 'user/getJoinFGState',
+      userDiscordData: 'user/userDiscordData',
+      userFriendGroupPreferences: 'user/userFriendGroupPreferences',
+      userFriendGroupInfo: 'user/userFriendGroupInfo',
+      currentUserScore: 'user/currentUserScore',
+      userDiscordTokenValid: 'user/userDiscordTokenValid',
+      userFriendGroupApplicationId: 'user/userFriendGroupApplicationId' // TODO: remove as well for testing only
     }),
     ...mapState({
       platformUpdates: state => state.updates.platformUpdates,
       pageLoaded: state => state.common.pageLoaded,
       signupReferralCode: state => state.common.signupReferralCode,
-      isSignWallVisible: state => state.common.isSignWallVisible
+      isSignWallVisible: state => state.common.isSignWallVisible,
+      friendGroups: state => Object.values(state.friendGroups.friendGroups) // TODO: remove as well for testing only
     }),
+    currentUrl () {
+      return window.location.origin + '/training-plan'
+    },
+    linkDiscordUrl () {
+      const url = new URL(process.env.VUE_APP_DISCORD_OAUTH_URL)
+      url.searchParams.set('state', btoa(JSON.stringify(this.discordOauthState)))
+      url.searchParams.set('redirect_uri', this.currentUrl)
+      return url
+    },
     computedCurrentUserEpicId () {
       return this.currentUser?.epicId || null
     },
@@ -642,13 +741,25 @@ export default {
   methods: {
     ...mapActions({
       userLogout: 'user/logout',
-      getPlatformUpdates: 'updates/getPlatformUpdates'
+      getPlatformUpdates: 'updates/getPlatformUpdates',
+      linkUserDiscordAccount: 'user/linkUserDiscordAccount',
+      updateApplication: 'friendGroups/updateApplication', // TODO: Remove this method - only testing perpuse!!
+      fetchFriendGroups: 'friendGroups/getFriendGroups' // TODO: Remove this method - only testing perpuse!!
     }),
     ...mapMutations({
       toggleSignWallModal: 'common/toggleSignWallModal',
       finishLoadingPaymentDetails: 'payments/setIsPaymentDetailsFinishLoading',
       setShowPreferencesdModalString: 'common/setShowPreferencesdModalString'
     }),
+    // TODO: Remove this method - only testing perpuse!!
+    passAdmin () {
+      this.fetchFriendGroups().then(() => {
+        this.updateApplication({
+          applicationId: this.userFriendGroupApplicationId,
+          friendGroupId: this.friendGroups[0]?.id
+        })
+      })
+    },
     hideSignWallModal () {
       if (this.$route.path.includes('/public/routines')) {
         this.trackAction('Shared content: Open Sign UP CTA Modal: Click Not Now')
@@ -690,8 +801,54 @@ export default {
         option: type
       })
     },
+    async doDiscordOauth2 ({ code, state }) {
+      if (code) {
+        this.togglePageLoaded(false)
+        let oauth2State = {}
+        try {
+          oauth2State = JSON.parse(atob(decodeURIComponent(state)))
+        } catch {}
+        // TODO! This should be changed to use current user!
+        const userId = localStorage.getItem('userId')
+        if (!userId) {
+          return
+        }
+        return this.linkUserDiscordAccount({
+          userId,
+          code,
+          redirectUri: this.currentUrl
+        })
+          .then(async () => {
+            if (oauth2State.joinFGPending) {
+              await this.joinFriendGroup(this.currentUser.id)
+            }
+            if (oauth2State.finalRedirectPath) {
+              this.$router.replace(oauth2State.finalRedirectPath)
+            }
+          })
+          .catch((err) => {
+            console.error(err)
+            this.$q.notify({
+              color: 'dark-pink',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Something went wrong. Try again or skip for now.',
+              badgeClass: 'hidden'
+            })
+          })
+          .finally(() => { this.togglePageLoaded(true) })
+      }
+    },
     onSearch () {
       this.trackAction('TP: Search')
+    },
+    async onUserSubmitLeaveFG ({ reason }) {
+      this.trackAction('FG: Leave: Reason', {
+        userId: this.currentUser?.id,
+        reason: reason
+      })
+      await this.removeFG()
+      this.setShowModalFgLeaveReason(false)
     },
     onUserLogout () {
       if (!this.currentUser) { return }
@@ -709,8 +866,43 @@ export default {
         this.$router.replace('/login')
       })
     },
-    onJoinFriend () {
-      this.$router.replace('/friend-group')
+    startFriendGroupApplicationFlow () {
+      this.$router.push('/friend-group')
+    },
+    onIntroFinished () {
+      if (this.userDiscordTokenValid) {
+        this.startFriendGroupApplicationFlow()
+      } else {
+        this.showDiscordLinkModal({ finalRedirectPath: '/friend-group' })
+      }
+    },
+    showDiscordLinkModal ({ joinFGPending, finalRedirectPath }) {
+      this.discordOauthState = { joinFGPending, finalRedirectPath }
+      this.showModalDiscordLink = true
+    },
+    hideDiscordLinkModal () {
+      this.discordOauthState = {}
+      this.showModalDiscordLink = false
+    },
+    hideJoinedSuccessModal () {
+      this.showModalJoinedSuccess = false
+    },
+    setShowFgLeave (value) {
+      this.showModalFgLeave = value
+    },
+    setShowModalFgLeaveReason (value) {
+      this.showModalFgLeaveReason = value
+    },
+    setShowFgStatePopup (value) {
+      if (value && this.joinFGButtonState === 'hasJoin') {
+        if (this.$route.query.joined) {
+          const query = Object.assign({}, this.$route.query)
+          delete query.joined
+          this.$router.replace({ query })
+        }
+        this.showJoinedTooltip = false
+      }
+      this.showFgStatePopup = value
     },
     showSubscriptionModal () {
       this.setShowUserSubscriptions(true)
@@ -733,6 +925,7 @@ export default {
     },
     avatarClick () {
       this.drop = !this.drop
+      this.isHideFGBtn = getLocalstorage('FGBtnStatus') !== null && getLocalstorage('FGBtnStatus') === 'false' && (this.joinFGButtonState === 'findJoin' || this.joinFGButtonState === 'canJoin')
     },
     joinNovosIfPublic () {
       this.trackAction('Public: Show paywall modal')
@@ -754,7 +947,12 @@ export default {
       getCheckoutPageUrl: 'payments/getCheckoutPageUrl',
       reloadUser: 'user/loadUser',
       unlinkUserEpicId: 'user/unlinkUserEpicId',
-      cancelSubscription: 'payments/cancelSubscription'
+      cancelSubscription: 'payments/cancelSubscription',
+      resumeSubscription: 'payments/resumeSubscription',
+      joinFriendGroup: 'user/joinFriendGroup',
+      findFriendGroup: 'user/findFriendGroup',
+      leaveFriendGroup: 'user/leaveFriendGroup',
+      requestAdminAssignment: 'user/requestAdminAssignment'
     }),
     onPageLoad (source) {
       setTimeout(() => {
@@ -817,6 +1015,41 @@ export default {
           this.showModalUnlinkEpicSuccess = true
         })
         .finally(() => this.togglePageLoaded(true))
+    },
+
+    async findAnotherFG () {
+      this.showLoader = true
+      await this.requestAdminAssignment(this.currentUser.id)
+      this.setShowFgStatePopup(false)
+      this.showLoader = false
+      // TODO - this logic should involve popup and error checking if cannot really reach him
+      this.$q.notify({
+        type: 'info',
+        message: 'We will contact you on discord, please make sure there is a way for us to do so'
+      })
+    },
+
+    async joinFG () {
+      if (this.userDiscordTokenValid) {
+        this.showLoader = true
+        await this.joinFriendGroup(this.currentUser.id)
+        this.setShowFgStatePopup(false)
+        this.showLoader = false
+        this.showModalJoinedSuccess = true
+      } else {
+        this.showDiscordLinkModal({ finalRedirectTarget: '/training-plan', joinFGPending: true })
+      }
+    },
+
+    async removeFG () {
+      this.showLoader = true
+      this.setShowFgLeave(false)
+      await this.leaveFriendGroup(this.currentUser.id)
+      if (getLocalstorage('FGBtnStatus') !== null) {
+        removeLocalstorage('FGBtnStatus')
+      }
+      this.setShowFgStatePopup(false)
+      this.showLoader = false
     },
 
     showUnlinkEpicModal () {
@@ -1005,7 +1238,7 @@ export default {
   }
   &__content{
     height: calc(var(--app-height) - 80px)!important;
-    border-radius: 12px 12px 0 0;
+    border-radius: 12px 0 0 0;
     box-shadow: 0 0 5px rgba(0, 0, 0, .3);
     overflow: hidden;
 
@@ -1250,15 +1483,10 @@ export default {
   opacity: 0;
   transform: translateY(10px);
 }
-.fg-join-btn-link {
-  color: #fff !important;
-  text-transform: none !important;
-  &:hover{
-    cursor: pointer;
-    text-decoration: none;
-  }
-  @media (max-width: $breakpoint-sm-max) {
-    padding-left: 1px;
-  }
+.btn-join-fg {
+  font-size: 18px;
+  font-family: Rift;
+  line-height: 0;
+  color: $light-pink !important;
 }
 </style>

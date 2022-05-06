@@ -7,6 +7,8 @@
     :allActivities="allActivitiesList"
     :paginatedSearchedActivities="paginatedSearchedActivities"
     :paginatedSearchState="paginatedSearchState"
+    :allActivitiesNumPages="allActivitiesNumPages"
+    :page="page"
     @get-next-page="getNextActivityPage"
     @select-activity="goToActivity"
     @search="searchActivities"

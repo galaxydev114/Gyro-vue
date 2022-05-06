@@ -23,14 +23,6 @@ export default {
       type: String,
       default: ''
     },
-    urlForRoutineOverview: {
-      type: Object,
-      default: null
-    },
-    urlForSession: {
-      type: Object,
-      default: null
-    },
     isDiscovery: {
       type: Boolean,
       default: false
@@ -50,6 +42,18 @@ export default {
     returnRouteName: {
       type: String,
       default: null
+    },
+    externalCompletion: {
+      type: Boolean,
+      default: false
+    },
+    exteralIsCompleted: {
+      type: Boolean,
+      default: null
+    },
+    nonCompletable: {
+      type: Boolean,
+      default: false
     }
   },
   data: () => ({
@@ -98,6 +102,9 @@ export default {
     triggerLoading (loadingState) {
       this.$emit('loading', loadingState)
     },
+    handleNewRoutinePicked (routineParams) {
+      this.$emit('reroute-to-new-user-routine', routineParams)
+    },
     clickSession (session) {
       if (session.id === this.sessionId) {
         return
@@ -106,22 +113,25 @@ export default {
       this.animation = true
       setTimeout(() => {
         this.trackAction('Routine: Click Left panel Sessions', { routineId: this.userRoutineId, sessionId: session.id })
-        this.$router.replace({ ...this.urlForSession, params: { id: this.routineId, sessionId: session.id } })
-          .then(() => { this.animation = false })
+        this.rerouteToSession(session.id)
       }, 300)
     },
     overviewRoutine () {
       this.trackAction('Routine: Click Overview', {
         routine: this.currentRoutine
       })
-      this.$router.replace({ ...this.urlForRoutineOverview, params: { id: this.routineId } })
+      this.$emit('reroute-to-overview')
+    },
+    rerouteToSession (sessionId) {
+      this.$emit('reroute-to-session', { sessionId }, () => {
+        this.animation = false
+      })
     },
     startRoutine () {
       this.animation = true
       setTimeout(() => {
         this.trackAction('Routine: Start Routine', this.currentRoutine)
-        this.$router.replace({ ...this.urlForSession, params: { id: this.routineId, sessionId: this.nextUndoneSession?.id || this.firstSession?.id } })
-          .then(() => { this.animation = false })
+        this.rerouteToSession(this.nextUndoneSession?.id || this.firstSession?.id)
       }, 300)
     },
     getNextSession (sessionId) {
@@ -145,10 +155,7 @@ export default {
         if (!nextSessionId) {
           console.error('No next session id')
         } else {
-          this.$router.replace({ query: this.$route.query, params: { sessionId: this.getNextSession(sessionId)?.id } })
-            .then(() => {
-              this.animation = false
-            })
+          this.rerouteToSession(this.getNextSession(sessionId)?.id)
         }
       }, 300)
     },
@@ -159,10 +166,7 @@ export default {
         if (!prevSessionId) {
           console.error('No prev session id')
         } else {
-          this.$router.replace({ query: this.$route.query, params: { sessionId: this.getPrevSession(sessionId)?.id } })
-            .then(() => {
-              this.animation = false
-            })
+          this.rerouteToSession(this.getPrevSession(sessionId)?.id)
         }
       }, 300)
     },
@@ -208,6 +212,10 @@ export default {
     },
 
     async completeRoutine ({ isSingleSession, noCongrats }) {
+      if (this.externalCompletion) {
+        this.$emit('done')
+        return
+      }
       this.triggerLoading(true)
       if (this.isDiscovery || this.isPublic) {
         this.$emit('completed-routine-local')

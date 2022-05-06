@@ -55,7 +55,7 @@ $categories: (
 .training-plan-tags{
   $root: &;
   padding: 10px 0;
-  margin: 15px 0 0 15px;
+  margin: 15px 0 0;
   display: flex;
   position: relative;
   z-index: 999;

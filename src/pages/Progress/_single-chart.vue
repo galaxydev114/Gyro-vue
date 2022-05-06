@@ -109,7 +109,6 @@ export default {
   computed: {
     chartData () {
       const labelsArray = this.data.userData.map(el => el.x)
-
       return {
         labels: labelsArray,
         charts: [

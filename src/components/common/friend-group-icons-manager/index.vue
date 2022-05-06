@@ -18,7 +18,10 @@ export default {
         fg_pros: require('@/assets/friend-group/pros.svg'),
         fg_lg_open: require('@/assets/friend-group/open-league.svg'),
         fg_lg_contender: require('@/assets/friend-group/contender-league.svg'),
-        fg_lg_champion: require('@/assets/friend-group/champion-league.svg')
+        fg_lg_champion: require('@/assets/friend-group/champion-league.svg'),
+        sp_flag: require('@/assets/friend-group/sp-flag.svg'),
+        fr_flag: require('@/assets/friend-group/fr-flag.svg'),
+        uk_flag: require('@/assets/friend-group/uk-flag.svg')
       }
     }
   },

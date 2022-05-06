@@ -80,6 +80,8 @@
   </div>
 </template>
 <script>
+import { durationStrFromSec } from '@/util/time'
+
 export default {
   components: {
     'c-timeline-chart-tracking': () => import('components/common/timeline-chart-tracking'),
@@ -163,16 +165,18 @@ export default {
 
       let tooltipData = []
       // Set Text
-      if (tooltip.body) {
-        tooltipData = tooltip.body.map((el, index) => {
-          const [title, value = '0'] = el.lines[0].split(':')
+      if (tooltip.dataPoints) {
+        tooltipData = tooltip.dataPoints.map((el, index) => {
+          const title = el.dataset.label
+          const value = el.dataset.isScoreTime ? durationStrFromSec(el.raw.y) : el.formattedValue.trim()
           return {
             color: tooltip.labelColors[index].borderColor,
             dataTitle: title,
-            dataValue: value.trim()
+            dataValue: value
           }
         })
       }
+
       const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas
       // Change to data binding. Introduced cause of re-rendering during WIP
       if (tooltipEl) {
@@ -183,12 +187,6 @@ export default {
 
       this.tooltipTitle = this.$date(tooltip.title[0]).format('MMMM DD')
       this.tooltipData = tooltipData
-    },
-    getLabelText (index) {
-      return this.$date(this.chartData.labels[index]).utc().format('MMM D')
-    },
-    getValueText (value) {
-      return value
     },
     filterOut (title) {
       if (this.exclude.has(title)) {

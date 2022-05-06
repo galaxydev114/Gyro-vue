@@ -38,9 +38,14 @@
           </q-item-section>
         </q-item>
       </q-list>
-      <q-btn v-if="showAgainBtn" class="not-me" outline @click="$emit('not-me')">
+      <c-btn outline
+        v-if="showAgainBtn"
+        class="not-me btn-join-fg"
+        color="light-pink"
+        :bold="false"
+        @click="$emit('not-me')">
         START OVER
-      </q-btn>
+      </c-btn>
     </div>
   </div>
 </template>
@@ -103,6 +108,13 @@ export default {
     flex-direction: column;
     transition: all .3s ease-in-out;
     position: relative;
+    .text-h1, .text-h2, .text-h4, .text-h5, span {
+      user-select: none; /* standard syntax */
+      -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+      -moz-user-select: none; /* mozilla browsers */
+      -khtml-user-select: none; /* webkit (konqueror) browsers */
+      -ms-user-select: none; /* IE10+ */
+    }
     &--not-rendered{
       transform: translateX(-100%);
     }

@@ -64,6 +64,16 @@ export const setCurrentTrainingPlan = (state, trainingPlan) => {
   state.updatedAt = new Date(trainingPlan.updatedAt)
 }
 
+export const setUserFriendGroupEventStatus = (state, userFriendGroupEvent) => {
+  const newEvents = state.userFriendGroupEvents.filter(event => userFriendGroupEvent.id !== event.id)
+  newEvents.push(userFriendGroupEvent)
+  state.userFriendGroupEvents = newEvents
+}
+
+export const setUserFriendGroupEvents = (state, userFriendGroupEvents) => {
+  state.userFriendGroupEvents = userFriendGroupEvents
+}
+
 export const setSelectedRoutine = (state, { position, dayNumber, timeSectionIdx, startHour }) => {
   state.selectedRoutine = { position, dayNumber, timeSectionIdx, startHour }
 }

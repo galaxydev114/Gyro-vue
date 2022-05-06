@@ -10,9 +10,9 @@
             {'routine--done': isCurrentRoutineDone},
             {'routine--is-current-day': isCurrentDay},
             {'routine--is-minimised': minimized},
+            {'routine--shared': shared},
             {'routine--drag': true},
          ]">
-
     <div class="routine__done" v-if="isCurrentRoutineDone">
       <c-icon icon="check"
               width="8px" />
@@ -27,10 +27,14 @@
           :category="data.skill"
           size="20px"
           class="text-weight-regular" />
-        <div class="q-ml-auto">
+        <div v-if="shared && !minimized" class="opacity-75 d-flex items-center bordered bordered--left" style="white-space: nowrap">
+          <c-icon icon="timer" class="q-mr-sm" />
+          {{timeString}}
+        </div>
+        <div class="q-ml-auto no-wrap">
           <slot name="handle" />
         </div>
-        <div class="flex" v-if="!minimized">
+        <div class="flex no-wrap" v-if="!minimized">
           <div class="q-ml-md">
             <c-icon v-if="isTagsContainTrackable" icon="progressGreen" width="16px" />
             <div v-else>
@@ -62,67 +66,104 @@
         {{ data.title }}
       </div>
       <div class="flex items-center opacity-7 q-mt-sm">
-        <div class="q-mr-md" v-if="isTagsContainFNCS">
+        <div class="q-mr-md" v-if="isTagsContainFNCS && !shared">
           FNCS Training
           <c-icon icon="trophy" style="height: 14px;vertical-align: baseline;"/>
         </div>
-        <div class="q-mr-md" v-else-if="isTagsContainCurrentSeason">
+        <div class="q-mr-md" v-else-if="isTagsContainCurrentSeason && !shared">
           {{seasonTitle}}
         </div>
-        <div class="text-left text-weight-regular" v-if="minimized">
+        <div class="text-left text-weight-regular" v-if="minimized || shared">
           {{ data.totalTime }} MINUTES
+        </div>
+        <div v-if="shared && minimized" class="opacity-75 d-flex items-center bordered bordered--left" style="white-space: nowrap">
+          <c-icon icon="timer" class="q-mr-sm" />
+          {{timeString}}
+        </div>
+      </div>
+      <div class="d-flex" v-if="shared" :class="{'items-center': !$q.screen.lt.sm, 'items-end': $q.screen.lt.sm}">
+        <n-shared-action-line :members="members" :isGoing="isGoing" :isDisabled="isFinished" @trigger="onGoingTrigger" />
+        <div class="text-right flex items-center no-wrap q-ml-auto">
+          <div class="routine__drop" v-if="!isFinished">
+            <div class="routine__drop-btn"
+                v-outside-click="() => (showDropdown = false)"
+                @click.stop="showOptions">
+              <span></span>
+              <span></span>
+              <span></span>
+              <q-tooltip
+                v-if="$q.screen.gt.xs"
+                anchor="top middle"
+                self="bottom middle"
+                max-width="240px"
+                content-style="background-color: #382B4B; font-size: 14px"
+                :offset="[10, 10]"
+              >
+                More options
+              </q-tooltip>
+            </div>
+            <div class="routine__drop-content" v-if="showDropdown">
+              <div v-if="!shared" @click.stop="trackOptionClick('Delete routine'); showModal = 'delete'">Delete</div>
+              <div v-else @click.stop="viewInDiscord">View in Discord</div>
+              <div v-if="shared" @click.stop="decline">Remove from schedule</div>
+            </div>
+          </div>
         </div>
       </div>
     </q-card-section>
-    <q-card-section class="routine__footer items-center text-subtitle2 d-flex">
-      <div class="text-left opacity-7 text-weight-regular" v-if="!minimized">
-        {{ data.totalTime }} MINUTES
-      </div>
-      <div class="flex" v-if="minimized">
-        <div class="q-mr-md">
-          <c-icon v-if="isTagsContainTrackable" icon="progressGreen" width="16px" />
-          <div v-else>
-            <!-- <c-icon icon="progress" width="16px" class="opacity-25" /> -->
-            <!-- <q-tooltip anchor="top left"
-                       self="bottom middle"
-                       max-width="240px"
-                       content-style="background-color: #382B4B; font-size: 14px"
-                       :offset="[10, 10]">
-              Tracking coming soon
-            </q-tooltip> -->
+    <q-card-section v-if="!shared" class="routine__footer items-center text-subtitle2 d-flex">
+      <template v-if="!shared">
+        <div class="text-left opacity-7 text-weight-regular" v-if="!minimized">
+          {{ data.totalTime }} MINUTES
+        </div>
+        <div class="flex" v-if="minimized">
+          <div class="q-mr-md">
+            <c-icon v-if="isTagsContainTrackable" icon="progressGreen" width="16px" />
+            <div v-else>
+              <!-- <c-icon icon="progress" width="16px" class="opacity-25" /> -->
+              <!-- <q-tooltip anchor="top left"
+                         self="bottom middle"
+                         max-width="240px"
+                         content-style="background-color: #382B4B; font-size: 14px"
+                         :offset="[10, 10]">
+                Tracking coming soon
+              </q-tooltip> -->
+            </div>
+          </div>
+          <div v-if="isExclusive" class="q-mr-md">
+            <img src="@/assets/logo-sm.svg" width="16px" />
           </div>
         </div>
-        <div v-if="isExclusive" class="q-mr-md">
-          <img src="@/assets/logo-sm.svg" width="16px" />
-        </div>
-      </div>
-      <div class="text-right q-ml-auto flex items-center no-wrap">
-        <div class="q-mr-md" @click.stop="pickAnotherRoutineClicked">
-          <c-icon icon="change" />
-          <q-tooltip
-            v-if="$q.screen.gt.xs"
-            anchor="top middle"
-            self="bottom middle"
-            max-width="240px"
-            content-style="background-color: #382B4B; font-size: 14px"
-            :offset="[10, 10]"
-          >
-            Pick another activity
-          </q-tooltip>
-        </div>
-        <div class="q-mr-md"  @click.stop="markCurrentRoutineAsDone(); showDropdown = false" v-if="!isCurrentRoutineDone">
-          <c-icon icon="checkRound" />
-          <q-tooltip
-            v-if="$q.screen.gt.xs"
-            anchor="top middle"
-            self="bottom middle"
-            max-width="240px"
-            content-style="background-color: #382B4B; font-size: 14px"
-            :offset="[10, 10]"
-          >
-            Mark as done
-          </q-tooltip>
-        </div>
+      </template>
+      <div v-if="!shared" class="text-right flex items-center no-wrap q-ml-auto">
+        <template>
+          <div class="q-mr-md" @click.stop="pickAnotherRoutineClicked">
+            <c-icon icon="change" />
+            <q-tooltip
+              v-if="$q.screen.gt.xs"
+              anchor="top middle"
+              self="bottom middle"
+              max-width="240px"
+              content-style="background-color: #382B4B; font-size: 14px"
+              :offset="[10, 10]"
+            >
+              Pick another activity
+            </q-tooltip>
+          </div>
+          <div class="q-mr-md" v-if="!isCurrentRoutineDone"  @click.stop="markCurrentRoutineAsDone(); showDropdown = false">
+            <c-icon icon="checkRound" />
+            <q-tooltip
+              v-if="$q.screen.gt.xs"
+              anchor="top middle"
+              self="bottom middle"
+              max-width="240px"
+              content-style="background-color: #382B4B; font-size: 14px"
+              :offset="[10, 10]"
+            >
+              Mark as done
+            </q-tooltip>
+          </div>
+        </template>
         <div class="routine__drop">
           <div class="routine__drop-btn"
                v-outside-click="() => (showDropdown = false)"
@@ -142,7 +183,9 @@
             </q-tooltip>
           </div>
           <div class="routine__drop-content" v-if="showDropdown">
-            <div @click.stop="trackOptionClick('Delete routine'); showModal = 'delete'">Delete</div>
+            <div v-if="!shared" @click.stop="trackOptionClick('Delete routine'); showModal = 'delete'">Delete</div>
+            <div v-else @click.stop="viewInDiscord">View in Discord</div>
+            <div v-if="shared" @click.stop="decline">Remove from schedule</div>
           </div>
         </div>
       </div>
@@ -184,6 +227,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isFinished: {
+      type: Boolean,
+      default: false
+    },
     data: {
       type: Object,
       default: () => {}
@@ -191,12 +238,25 @@ export default {
     minimized: {
       type: Boolean,
       default: false
+    },
+    shared: {
+      type: Boolean,
+      default: false
+    },
+    participants: {
+      type: Array,
+      default: () => []
+    },
+    isGoing: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
     'n-routine-delete': () => import('@/components/dashboard/modal/modal-routine-delete'),
     'n-pick-routine-modal': () => import('@/components/training-routine/pick-another-routine'),
-    'routine-category': () => import('@/components/common/activity-category')
+    'routine-category': () => import('@/components/common/activity-category'),
+    'n-shared-action-line': () => import('@/components/shared-action-line')
   },
   mixins: [paymentMixin],
   data () {
@@ -214,6 +274,9 @@ export default {
     ...mapState({
       seasonTitle: state => state.fortniteSeason.title
     }),
+    timeString () {
+      return this.data.startHour ? `${this.data.startHour}-${this.data.endHour}` : ''
+    },
     isCurrentRoutineDone () {
       return this.data.isCompleted
     },
@@ -237,11 +300,20 @@ export default {
     },
     isExclusive () {
       return this.data?.isExclusive || false
+    },
+    members () {
+      return this.participants.map(participant => ({
+        name: participant.discordUserName,
+        avatar: participant.avatarUrl
+      }))
     }
   },
   methods: {
     ...mapActions({
       markRoutineAsDone: 'trainingRoutine/markRoutineAsDone',
+      subscribeToEvent: 'trainingPlan/subscribeToEvent',
+      unsubscribeFromEvent: 'trainingPlan/unsubscribeFromEvent',
+      declineEvent: 'trainingPlan/declineEvent',
       _deleteRoutineFromTrainingPlan: 'trainingRoutine/deleteRoutineFromTrainingPlan',
       fetchAlternativeRoutines: 'trainingRoutine/fetchAlternativeRoutines'
     }),
@@ -253,6 +325,34 @@ export default {
       this.fetchAlternativeRoutines({ excludeIds: [`${this.data.trainingRoutineId}`], skillBased: this.data.skill }).then(() => {
         this.showModal = 'routine'
       })
+    },
+    async onGoingTrigger () {
+      if (!this.isGoing) {
+        await this.subscribe()
+        this.$emit('going')
+      } else {
+        await this.unsubscribe()
+      }
+    },
+    viewInDiscord () {
+      this.trackOptionClick('View in Discord')
+      window.open(this.data.discordEventUrl, '_blank')
+    },
+    async decline () {
+      this.loading = true
+      this.trackOptionClick('Remove from schedule')
+      await this.declineEvent(this.data.friendGroupEventId)
+      this.loading = false
+    },
+    async subscribe () {
+      this.loading = true
+      await this.subscribeToEvent(this.data.friendGroupEventId)
+      this.loading = false
+    },
+    async unsubscribe () {
+      this.loading = true
+      await this.unsubscribeFromEvent(this.data.friendGroupEventId)
+      this.loading = false
     },
     markCurrentRoutineAsDone () {
       this.loading = true
@@ -315,6 +415,26 @@ export default {
   background: $dark-one;
   border: none;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.202551);
+  border-left: 5px solid $gray;
+  .text-h3,
+  .text-h5{
+    font-family: 'Roboto', '-apple-system', 'Helvetica Neue', Helvetica, Arial, sans-serif!important;
+    text-transform: unset;
+  }
+  &:hover{
+    text-decoration: none;
+    background-color: $dark-sec;
+    transform: scale(1.02);
+    z-index: 5;
+    #{$root}__footer{
+      max-height: 44px;
+      opacity: 1;
+      overflow: unset;
+    }
+  }
+  &:last-child{
+    margin-bottom: 0;
+  }
 
   &__done{
     z-index: 3;
@@ -333,6 +453,7 @@ export default {
   }
   &__drop{
     z-index: 99;
+    position: relative;
     &-btn{
       display: flex;
       flex-direction: row;
@@ -356,11 +477,8 @@ export default {
     }
     &-content{
       position: absolute;
-      top: 35px;
+      bottom: 32px;
       right: 10px;
-      @media all and (max-width: $breakpoint-xs-max) {
-        top: -35px;
-      }
       background: $mid-tone;
       border-radius: 6px;
       z-index: 10;
@@ -420,22 +538,6 @@ export default {
       border-radius: 0 0 6px 6px;
     }
   }
-  .text-h3,
-  .text-h5{
-    font-family: 'Roboto', '-apple-system', 'Helvetica Neue', Helvetica, Arial, sans-serif!important;
-    text-transform: unset;
-  }
-  &:hover{
-    text-decoration: none;
-    background: $dark-sec;
-    transform: scale(1.02);
-    z-index: 5;
-    #{$root}__footer{
-      max-height: 44px;
-      opacity: 1;
-      overflow: unset;
-    }
-  }
   @media all and (max-width: $breakpoint-xs-max) {
     text-decoration: none;
     background: $dark-sec;
@@ -444,11 +546,6 @@ export default {
       background: $dark-sec;
     }
   }
-  &:last-child{
-    margin-bottom: 0;
-  }
-
-  border-left: 5px solid $gray;
   &--mechanical{
     border-left-color: #6533D1;
     #{$root}__footer{
@@ -554,7 +651,7 @@ export default {
   }
   @media all and (min-width: $breakpoint-sm-min) {
     &--is-current-day {
-      background: rgba(255, 255, 255, .03);
+      background-color: rgba(255, 255, 255, .03);
     }
   }
   &.sortable-chosen{
@@ -598,7 +695,10 @@ export default {
     flex-wrap: nowrap;
     padding: 5px 0;
     white-space: nowrap;
-    text-overflow: ellipsis;
+    .text-h3{
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
     &:hover{
       transform: scale(0.99);
     }
@@ -627,6 +727,27 @@ export default {
       height: auto;
       width: auto;
       background: transparent;
+    }
+  }
+
+  &--shared{
+    background-image: url("./../../../assets/trainingRoutine/shared-bg.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border-left-color: $bright-pink !important;
+    &:hover {
+      border-right: 1.5px solid $bright-pink;
+      border-top: 1.5px solid $bright-pink;
+      border-bottom: 1.5px solid $bright-pink;
+    }
+  }
+
+  .bordered {
+    margin-left: 8px;
+    padding-left: 8px;
+    &--left {
+      border-left: 1px solid $soft-tone;
     }
   }
 }

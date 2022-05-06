@@ -88,7 +88,7 @@ export default {
       if (!this.trainingPlanFocus) return
       return this.trainingPlanFocus ? this.trainingPlanFocus.map(el => ({
         category: el.category,
-        label: `${camelCase(el.category.toUpperCase(), { pascalCase: true })} - ${el.technique.split(' ').map(e => {
+        label: `${camelCase(el.category?.toUpperCase(), { pascalCase: true })} - ${el.technique?.split(' ').map(e => {
           return camelCase(e, { pascalCase: true })
         }).join(' ')}`
       })) : []

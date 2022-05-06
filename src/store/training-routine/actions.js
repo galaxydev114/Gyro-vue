@@ -1,19 +1,8 @@
 import * as api from '@/services/api'
 
-/**
- * @param {Error | import('axios').AxiosError} err
- */
-const handleError = err => {
-  if (err.response) {
-    throw new Error(err.response.data)
-  }
-
-  throw err
-}
-
 export const setSessionScoreGetStats = async ({ dispatch, commit }, { routineId, sessionId, score }) => {
   const resposne = await api.setSessionScoreGetStats(sessionId, score)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const scoreStats = resposne.data?.scoreStats
   if (scoreStats) {
@@ -25,7 +14,7 @@ export const setSessionScoreGetStats = async ({ dispatch, commit }, { routineId,
 
 export const getSessionScoreStats = async ({ commit }, sessionId) => {
   const resposne = await api.getSessionScoreStats(sessionId)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const scoreStats = resposne.data?.scoreStats
   if (scoreStats) {
@@ -36,12 +25,12 @@ export const getSessionScoreStats = async ({ commit }, sessionId) => {
 }
 
 export const markSessionAsDone = async ({ dispatch }, { routineId, sessionId }) => {
-  await api.markSessionAsDone(routineId, sessionId).catch(handleError)
+  await api.markSessionAsDone(routineId, sessionId).catch(api.handleError)
   return dispatch('fetchUserTrainingRoutineSessions', routineId)
 }
 
 export const markRoutineAsDone = async ({ dispatch }, { routineId }) => {
-  await api.markRoutineAsDone(routineId).catch(handleError)
+  await api.markRoutineAsDone(routineId).catch(api.handleError)
   return dispatch(
     'trainingPlan/fetchUserCurrentTrainingPlan',
     null,
@@ -51,7 +40,7 @@ export const markRoutineAsDone = async ({ dispatch }, { routineId }) => {
 
 export const markActivitiesAsDone = async ({ dispatch }, activitiesIds) => {
   await Promise.all(
-    activitiesIds.map(id => api.markRoutineAsDone(id).catch(handleError))
+    activitiesIds.map(id => api.markRoutineAsDone(id).catch(api.handleError))
   )
 
   return dispatch('trainingPlan/fetchUserCurrentTrainingPlan', null, { root: true })
@@ -59,7 +48,7 @@ export const markActivitiesAsDone = async ({ dispatch }, activitiesIds) => {
 
 export const deleteRoutineFromTrainingPlan = async ({ dispatch, rootState }, { routineId }) => {
   const userId = rootState.user.currentUser?.id
-  await api.deleteRoutineFromTrainingPlan(userId, routineId).catch(handleError)
+  await api.deleteRoutineFromTrainingPlan(userId, routineId).catch(api.handleError)
 
   return dispatch(
     'trainingPlan/fetchUserCurrentTrainingPlan',
@@ -70,7 +59,7 @@ export const deleteRoutineFromTrainingPlan = async ({ dispatch, rootState }, { r
 
 export const createRoutine = async ({ commit }, routineData) => {
   const resposne = await api.createRoutine(routineData)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const routine = resposne.data?.routine
   if (routine) {
@@ -82,7 +71,7 @@ export const createRoutine = async ({ commit }, routineData) => {
 export const fetchAllRoutinesWithWeightsArray = async ({ commit }) => {
   const isWeightOverTime = true
   const response = await api.getRoutines(isWeightOverTime)
-    .catch(handleError)
+    .catch(api.handleError)
 
   if (response.status === 200) {
     commit('setRoutinesWeights', response.data.trainingRoutinesWeights)
@@ -92,7 +81,7 @@ export const fetchAllRoutinesWithWeightsArray = async ({ commit }) => {
 
 export const fetchAllRoutines = async ({ commit }) => {
   const response = await api.getRoutines()
-    .catch(handleError)
+    .catch(api.handleError)
 
   if (response.status === 200) {
     commit('setRoutines', response.data.trainingRoutines)
@@ -101,7 +90,7 @@ export const fetchAllRoutines = async ({ commit }) => {
 
 export const updateRoutine = async ({ commit }, routineData) => {
   const response = await api.updateRoutine(routineData.id, routineData)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const routine = response.data.routine
   if (routine) {
@@ -111,7 +100,7 @@ export const updateRoutine = async ({ commit }, routineData) => {
 
 export const fetchUserTrainingRoutineSessions = async ({ commit }, userTrainingRoutineId) => {
   const response = await api.getTrainingRoutineSessions(userTrainingRoutineId)
-    .catch(handleError)
+    .catch(api.handleError)
 
   commit('addNewRoutine', response.data.trainingRoutine)
 
@@ -123,13 +112,13 @@ export const fetchUserTrainingRoutineSessions = async ({ commit }, userTrainingR
 
 export const fetchRoutinesSessions = async ({ commit }, userTrainingRoutineIds) => {
   const response = await api.getTrainingRoutinesSessions(userTrainingRoutineIds)
-    .catch(handleError)
+    .catch(api.handleError)
   commit('userSession/setUserTrainingSessionsBatch', response.data.trainingRoutines, { root: true })
 }
 
 export const deleteRoutine = async ({ commit }, routineId) => {
   await api.deleteRoutine(routineId)
-    .catch(handleError)
+    .catch(api.handleError)
 }
 
 export const createNewUserRoutine = async ({ commit, rootState, dispatch }, routine) => {
@@ -154,7 +143,7 @@ export const fetchAlternativeRoutines = async ({ commit, rootState }, { excludeI
         commit('setTempAlternativeRoutines', response.data.alternativeRoutines || [])
       }
     })
-    .catch(handleError)
+    .catch(api.handleError)
 }
 
 export const getRoutineUserData = async ({ commit, rootState }, { trainingRoutineId, userId }) => {
@@ -164,5 +153,5 @@ export const getRoutineUserData = async ({ commit, rootState }, { trainingRoutin
         commit('setTrainingRoutineUserData', response.data || {})
       }
     })
-    .catch(handleError)
+    .catch(api.handleError)
 }

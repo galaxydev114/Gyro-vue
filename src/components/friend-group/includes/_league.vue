@@ -1,44 +1,60 @@
 <template>
   <div class="col scores-container scores-container--show">
-    <div class="text-center q-mt-lg-xl justify-center">
-      <div class="row items-stretch justify-between q-mb-lg">
-        <div v-for="(cat, index) in categoryItems" :key="cat.label" class="col-md col-12">
-          <div class="q-py-lg bordered items-center  q-ma-lg-md q-ma-md-sm q-my-sm cat-item"
-            :class="{'selected': selectedLeague === index, 'row q-px-md': $q.screen.lt.sm, 'column justify-center': $q.screen.gt.sm }"
-            @click="onToggle(index)" >
-            <c-skill-icons v-slot="{ getIcon }">
-              <img
-                :src="getIcon(cat.icon)"
-                :width="64"
-                :height="64"/>
-            </c-skill-icons>
-            <span class="q-mt-lg-lg text-h2 text-uppercase" :class="{'q-ml-md': $q.screen.lt.sm,}">
-              {{ cat.label }}
-            </span>
+    <div class="text-center q-mt-lg-xl q-mt-md-md q-mt-sm-md q-mt-xs-sm justify-center d-flex q-mb-lg">
+      <div style="max-width: 1200px">
+        <div class="row items-stretch justify-between q-mb-lg">
+          <div v-for="cat of categoryItems" :key="cat.label" class="col-md col-12 q-pa-lg-md q-pa-md-sm q-py-sm">
+            <div class="q-py-lg bordered items-center cat-item"
+              :class="{'selected': selectedLeague === cat.name, 'row q-px-md': $q.screen.lt.sm, 'column justify-center': $q.screen.gt.xs }"
+              @click="onToggle(cat.name)" >
+              <c-skill-icons v-slot="{ getIcon }">
+                <img
+                  :src="getIcon(cat.icon)"
+                  :width="$q.screen.gt.xs ? 64: 48"
+                  :height="$q.screen.gt.xs ? 64: 48"/>
+              </c-skill-icons>
+              <span class="q-mt-lg-lg q-mt-md-md q-mt-sm-sm text-h2 text-uppercase" :class="{'q-ml-sm': $q.screen.lt.sm}">
+                {{ cat.label }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row items-stretch justify-between q-mb-lg gt-sm">
+          <div class="col-md col-12">
+            <div class="q-ma-lg-sm q-ma-md-sm q-my-sm ">
+              <img :src="openBgIcon" class="q-mt-sm full-width" alt="open-league" />
+            </div>
+          </div>
+          <div class="col-md col-12">
+            <div class="q-ma-lg-sm q-ma-md-sm q-my-sm ">
+              <img :src="contenderBgIcon" class="q-mt-sm full-width" alt="contender-league" />
+            </div>
+          </div>
+          <div class="col-md col-12">
+            <div class="q-ma-lg-sm q-ma-md-sm q-my-sm ">
+              <img :src="championBgIcon" class="q-mt-sm full-width" alt="champion-league" />
+            </div>
           </div>
         </div>
       </div>
-      <img :src="leagueIcon" class="q-mt-md gt-sm full-width" alt="league" />
-      <img :src="openBgIcon" class="q-mt-sm lt-sm full-width" alt="open-league" />
-      <img :src="contenderBgIcon" class="q-mt-sm lt-sm full-width" alt="contender-league" />
-      <img :src="championBgIcon" class="q-mt-sm lt-sm full-width" alt="champion-league" />
     </div>
-    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center">
+    <div class="row full-width q-mt-lg q-px-lg-lg q-px-sm-none q-pb-md q-pb-md-none text-right justify-center mt-fixed-bottom">
       <div class="col-6 q-px-lg-none q-pr-sm">
-        <q-btn outline
-              class="q-btn-main q-px-md btn-join-fg"
-              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.sm}"
-              color="white"
+        <c-btn outline
+              class="btn-join-fg"
+              :bold="false"
+              :class="{'full-width': $q.screen.lt.sm, 'btn-previous': $q.screen.gt.xs}"
+              color="light-pink"
               @click="$emit('previous')">
           Previous
-        </q-btn>
+        </c-btn>
       </div>
       <div class="col-6 q-px-lg-none q-pl-sm">
         <q-btn unelevated
-             class="q-btn-main q-px-md btn-join-fg"
-             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.sm}"
+             class="q-px-md btn-join-fg"
+             :class="{'full-width': $q.screen.lt.sm, 'btn-next': $q.screen.gt.xs}"
              color="dark-pink"
-             :disable="selectedLeague === -1"
+             :disable="!selectedLeague"
              @click="$emit('next')">
           Next
         </q-btn>
@@ -56,8 +72,8 @@ import championBgIcon from '@/assets/friend-group/champion-league-bg.svg'
 export default {
   props: {
     selectedLeague: {
-      type: Number,
-      default: -1
+      type: String,
+      default: null
     }
   },
   data () {
@@ -65,16 +81,19 @@ export default {
       categoryItems: [
         {
           step: 1,
+          name: 'open',
           icon: 'fg_lg_open',
           label: 'Open League'
         },
         {
           step: 2,
+          name: 'contender',
           icon: 'fg_lg_contender',
           label: 'Contender League'
         },
         {
           step: 3,
+          name: 'champion',
           icon: 'fg_lg_champion',
           label: 'Champion League'
         }
@@ -89,8 +108,8 @@ export default {
     'c-skill-icons': () => import('@/components/common/friend-group-icons-manager')
   },
   methods: {
-    onToggle (step) {
-      this.selectedLeague = step
+    onToggle (league) {
+      this.$emit('selected', league)
     }
   }
 }
@@ -103,6 +122,7 @@ export default {
     background: $dark-one;
     box-shadow: 4px 0px 20px rgba(0, 0, 0, 0.1), 0px 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
+    height: 100%;
     &:hover {
       border: 1.5px solid $dark-pink;
     }

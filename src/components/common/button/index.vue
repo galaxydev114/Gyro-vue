@@ -157,8 +157,9 @@ export default {
     .q-btn{
       font-size: .875rem;
       min-width: unset;
+      line-height: 18px;
       &__wrapper{
-        padding: 4px 12px;
+        padding: 2px 8px;
       }
     }
   }

@@ -178,6 +178,26 @@
       </div>
 
       <div class="form__item">
+        Is Published?
+        <q-toggle
+          size="xl"
+          checked-icon="check"
+          unchecked-icon="clear"
+          color="green"
+          v-model="knowledge.isPublished"
+        />
+      </div>
+      <div class="form__item">
+        Is Discoverable?
+        <q-toggle
+          size="xl"
+          checked-icon="check"
+          unchecked-icon="clear"
+          color="green"
+          v-model="knowledge.isDiscoverable"
+        />
+      </div>
+      <div class="form__item">
         Is Exclusive?
         <q-toggle
           size="xl"
@@ -266,7 +286,9 @@ export default {
         optimalLevel: 0,
         insights: [],
         thumbnail: '',
-        isExclusive: false
+        isExclusive: false,
+        isDiscoverable: false,
+        isPublished: false
       },
       temporaryInsight: {
         title: '',
@@ -326,6 +348,8 @@ export default {
         this.knowledge.insights = this.initialKnowledgeTime.insights || []
         this.knowledge.thumbnail = this.initialKnowledgeTime.thumbnail
         this.knowledge.isExclusive = this.initialKnowledgeTime.isExclusive
+        this.knowledge.isPublished = this.initialKnowledgeTime.isPublished
+        this.knowledge.isDiscoverable = this.initialKnowledgeTime.isDiscoverable
       }
     },
 

@@ -33,10 +33,11 @@
           </div>
         </div>
         <!--        Step 1-->
-        <score-graph key="score-graph"
-                     @next="goNext();
-                     trackAction('Skill Score: Click Next')"
-                     v-if="isScoreStep()"/>
+        <template v-if="isScoreStep()">
+          <score-graph key="score-graph"
+                       @next="goNext();
+                              trackAction('Skill Score: Click Next')"/>
+        </template>
         <!--        Step 2 test -->
         <goal-setup key="goal"
                     v-if="isCurrentStep('goal')"
@@ -68,6 +69,7 @@
                     v-if="computedPreperingArray[currentStep - 1] && computedPreperingArray[currentStep - 1].explainer"
                     @hide="() => {
                     if (isCurrentExplainerSkillScore) {
+                      startScoreAnimation = true
                       trackAction('Skill Score: Click Got It on Explainer')
                       trackAction('See Skill Score', { score: currentUserScore })
                     }
@@ -123,7 +125,8 @@ export default {
       userTechniquesArray: [],
       firstInit: true,
       leftBarWidth: 360,
-      showReadyModal: false
+      showReadyModal: false,
+      startScoreAnimation: false
     }
   },
   methods: {
@@ -134,7 +137,9 @@ export default {
       saveUserTools: 'user/saveUserTools',
       saveUserTechniques: 'user/saveUserTechniques',
       saveUserGoals: 'user/saveUserGoals',
-      finishUserPreferences: 'user/finishUserPreferences'
+      finishUserPreferences: 'user/finishUserPreferences',
+      reloadUser: 'user/loadUser',
+      getUserScore: 'user/getUserScore'
     }),
     draggedEvent () {
       this.trackAction('Skills Priority: item dragged')
@@ -166,7 +171,7 @@ export default {
         this.computedPreperingArray[this.computedPreperingArray.length - 1].step
 
       if (finish) {
-        this.finishUserPreferences({ userId: this.user.id }).then(() => {
+        return this.finishUserPreferences({ userId: this.user.id }).then(() => {
           this.$emit('finish')
         })
       }
@@ -217,12 +222,7 @@ export default {
     async trainingScheduleNextStep (trainingSchedule) {
       await this.nextTrainingSchedule(trainingSchedule)
       this.trackAction('Training Slots: Click Next', trainingSchedule)
-
-      if (this.abGoalTest) {
-        this.showReadyModal = true
-      } else {
-        this.goNext()
-      }
+      this.showReadyModal = true
     },
     goToTrainingPlan () {
       this.trackAction('Manage expectations: are you ready modal: Click I\'m ready')
@@ -246,7 +246,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      abGoalTest: 'experiments/experimentGyroOnboardingGoal',
       hoursPlayADay: 'user/hoursPlayADay',
       daysAvailableArray: 'user/daysAvailableArray',
       timeInADayArray: 'user/timeInADayArray',
@@ -280,25 +279,21 @@ export default {
       return this.computedPreperingArray[this.currentStep - 1]?.explainer?.subtitle === 'Skill Score'
     },
     computedPreperingArray () {
-      if (this.abGoalTest) {
-        const arr = this.onboardingStepsLeftPanelArray
-        const goalStep = {
-          step: 2,
-          disabled: false,
-          label: 'Goal selection',
-          title: 'where do you want to be <span class="text-pink">next season</span>',
-          description: 'Place yourself where you want to be'
-        }
-        return [
-          arr[0],
-          goalStep,
-          ...arr.slice(1).map(el => {
-            el.step++
-            return el
-          })]
-      } else {
-        return this.onboardingStepsLeftPanelArray
+      const arr = this.onboardingStepsLeftPanelArray
+      const goalStep = {
+        step: 2,
+        disabled: false,
+        label: 'Goal selection',
+        title: 'where do you want to be <span class="text-pink">next season</span>',
+        description: 'Place yourself where you want to be'
       }
+      return [
+        arr[0],
+        goalStep,
+        ...arr.slice(1).map(el => {
+          el.step++
+          return el
+        })]
     },
     onboardingStepsLeftPanelArray () {
       return [
@@ -309,29 +304,21 @@ export default {
           title: 'Estimated <span class="text-pink">Skill</span> score',
           description: this.descriptionBasedOnUserScore,
           explainer: {
-            subtitle: 'Skill score',
+            subtitle: 'Skill Score',
             text: 'This is your <span class="text-pink">estimated</span> skill score.</br> We will use it to fit you with the right training activities.'
           }
         },
         {
           step: 2,
           label: 'Skills priority set',
-          title: this.abGoalTest
-            ? 'What is holding you back the most?'
-            : 'Which skill <span class="text-pink">holds</span> you <span class="text-pink">back</span>?',
-          description: this.abGoalTest
-            ? '<span class="text-pink">Drag and drop</span> the cards to order the most important skills for you'
-            : 'Move the skills from the most challenging for you to the least'
+          title: 'What is holding you back the most?',
+          description: '<span class="text-pink">Drag and drop</span> the cards to order the most important skills for you'
         },
         {
           step: 3,
           label: 'Techniques selection',
-          title: this.abGoalTest
-            ? 'Let\'s be more specific'
-            : 'select which <span class="text-pink">techniques</span> you<br> would like to improve',
-          description: this.abGoalTest
-            ? 'We will select training routines based on your choices'
-            : 'We will suggest training routines based on your needs'
+          title: 'Let\'s be more specific',
+          description: 'We will select training routines based on your choices'
         },
         {
           step: 4,
@@ -342,22 +329,14 @@ export default {
         {
           step: 5,
           label: 'Your availability',
-          title: this.abGoalTest
-            ? 'Choose when you are available to <span class="text-pink">train</span>'
-            : 'Tell us about your <span class="text-pink">availability</span>',
-          description: this.abGoalTest
-            ? 'Choose at least 3 days a week, but make sure you\'re being realistic!'
-            : 'Help us create a perfect schedule that fits your time'
+          title: 'Choose when you are available to <span class="text-pink">train</span>',
+          description: 'Choose at least 3 days a week, but make sure you\'re being realistic!'
         },
         {
           step: 6,
           label: 'Fortnite time slots',
-          title: this.abGoalTest
-            ? 'Recommended Training Schedule'
-            : 'Suggested <span class="text-pink">time slots</span>',
-          description: this.abGoalTest
-            ? 'This is the schedule we recommend. You can change it to make sure it’s realistic'
-            : this.$q.screen.gt.sm ? 'Edit the blocks to make adjustments to your Fortnite time' : 'This is our suggested schedule to optimize your training. You can always change it later.'
+          title: 'Recommended Training Schedule',
+          description: 'This is the schedule we recommend. You can change it to make sure it’s realistic'
         }
       ]
     },
@@ -365,6 +344,7 @@ export default {
       // arr order should be the same as steps
       const steps = [
         'skillScore',
+        'goal',
         'priority',
         'techniques',
         'kovaak',
@@ -372,14 +352,7 @@ export default {
         'timeSlots'
       ]
 
-      if (this.abGoalTest) {
-        return [
-          steps[0],
-          'goal',
-          ...steps.slice(1)]
-      } else {
-        return steps
-      }
+      return steps
     }
   },
   beforeDestroy () {
@@ -388,6 +361,11 @@ export default {
   mounted () {
     setTimeout(() => {
       this.firstInit = false
+      if (!this.currentUserScore) {
+        this.reloadUser().then(() => {
+          this.getUserScore({ userId: this.user?.id, forceCalc: true })
+        })
+      }
     }, 200)
   },
   watch: {

@@ -46,6 +46,10 @@ export default {
     noBorder: {
       type: Boolean,
       default: false
+    },
+    externalTrackAction: {
+      type: Function,
+      default: null
     }
   },
   components: {

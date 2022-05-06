@@ -1,19 +1,8 @@
 import * as api from '@/services/api'
 
-/**
- * @param {Error | import('axios').AxiosError} err
- */
-const handleError = err => {
-  if (err.response) {
-    throw new Error(err.response.data)
-  }
-
-  throw err
-}
-
 export const createSession = async ({ commit }, sessionData) => {
   const resposne = await api.createSession(sessionData)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const session = resposne.data?.session
   if (session) {
@@ -24,7 +13,7 @@ export const createSession = async ({ commit }, sessionData) => {
 
 export const updateSession = async ({ commit }, sessionData) => {
   const response = await api.updateSession(sessionData.id, sessionData)
-    .catch(handleError)
+    .catch(api.handleError)
 
   const session = response.data.session
   if (session) {
@@ -34,7 +23,7 @@ export const updateSession = async ({ commit }, sessionData) => {
 
 export const fetchAllSessions = async ({ commit }) => {
   const response = await api.getSessions(null, true)
-    .catch(handleError)
+    .catch(api.handleError)
 
   if (response.status === 200) {
     commit('setSessions', response.data.sessions)
@@ -43,5 +32,10 @@ export const fetchAllSessions = async ({ commit }) => {
 
 export const deleteSession = async ({ commit }, sessionId) => {
   return api.deleteSession(sessionId)
-    .catch(handleError)
+    .catch(api.handleError)
+}
+
+export const resetScoreUserSession = async ({ commit }, sessionId) => {
+  return api.resetScoreUserSession(sessionId)
+    .catch(api.handleError)
 }

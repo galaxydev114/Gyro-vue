@@ -75,19 +75,25 @@
                       'coupon-input--success': couponSuccess,
                       'coupon-input--error': couponCode.length && !couponSuccess,
               }">
-                <c-icon icon="couponGreen" v-if="couponSuccess"></c-icon>
-                <c-icon icon="couponPink" v-else></c-icon>
+                <discount-icon
+                  :is-success-icon-visible="couponSuccess"
+                  :is-loading="isLoadingCouponValidationResult"/>
                 <div>
                   <input type="text"
                          @keydown="couponKeyDownEvent"
-                         v-model.trim="couponCode"
+                         @input="setCouponCode"
                          placeholder="Coupon Code"/>
                 </div>
-                <c-icon icon="couponGreen" v-if="couponSuccess"></c-icon>
-                <c-icon icon="couponPink" v-else></c-icon>
-                <div class="coupon-input__validation-msg" v-if="couponCode.length && !couponSuccess">
+                <discount-icon
+                  :is-success-icon-visible="couponSuccess"
+                  :is-loading="isLoadingCouponValidationResult"/>
+              </div>
+              <div class="coupon-input-result">
+                <span
+                  v-if="isCouponFormTouched && !isLoadingCouponValidationResult && !couponSuccess"
+                  class="coupon-input-result__text">
                   Coupon not valid
-                </div>
+                </span>
               </div>
             </div>
           </div>
@@ -131,6 +137,7 @@
 <script>
 import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
 import { debounce } from 'quasar'
+import { checkCouponCode } from '@/services/api'
 
 export default {
   props: {
@@ -145,7 +152,8 @@ export default {
   },
   components: {
     'page-loader': () => import('@/components/common/page-loader'),
-    'n-modal': () => import('@/components/dashboard/modal')
+    'n-modal': () => import('@/components/dashboard/modal'),
+    'discount-icon': () => import('@/components/common/icon/discount-icon.vue')
   },
   data () {
     return {
@@ -160,7 +168,10 @@ export default {
       },
       checkInterval: null,
       showModal: false,
-      couponCode: ''
+      couponCode: '',
+      couponSuccess: false,
+      isLoadingCouponValidationResult: false,
+      isCouponFormTouched: false
     }
   },
   computed: {
@@ -196,15 +207,6 @@ export default {
     },
     canClose () {
       return this.trialDaysLeft > 0 || this.$q.platform.is.mobile
-    },
-    couponSuccess () {
-      const couponNames = ['TEADOH', 'NOVOSXMAS', 'CARTER', 'CELLULAR', 'LESTRIPEZ', 'WINMORE', 'PAT', 'CR80', 'SPRITE']
-
-      if (this.couponCode && couponNames.includes(this.couponCode.toUpperCase())) {
-        this.trackAction('Paywall coupon: Coupon valid')
-        return true
-      }
-      return false
     },
     pricePerMonthWithCoupone () {
       return '1.90'
@@ -292,9 +294,35 @@ export default {
       } else {
         this.removeEventListener()
       }
+    },
+    async setCouponCode (event) {
+      if (event.target.value === '') {
+        this.isCouponFormTouched = false
+        this.isLoadingCouponValidationResult = false
+        this.couponSuccess = false
+        this.couponCode = ''
+        return
+      }
+
+      this.isCouponFormTouched = true
+      this.isLoadingCouponValidationResult = true
+      this.couponSuccess = false
+      this.couponCode = event.target.value.toUpperCase()
+      await this.validateCouponCode()
+    },
+    async validateCouponCode () {
+      const response = await checkCouponCode(this.couponCode)
+      if (response.data.isCouponCodeValid) {
+        this.trackAction('Paywall coupon: Coupon valid')
+        this.couponSuccess = true
+      } else {
+        this.couponSuccess = false
+      }
+      this.isLoadingCouponValidationResult = false
     }
   },
   created: function () {
+    this.validateCouponCode = debounce(this.validateCouponCode, 500)
     return this.getPaymentPlans().then(() => {
       this.selectedPaymentPlan = this.defaultPaymentPlan
       this.trackAction('Payments: Show Paywall type:', { type: this.isFailedSubscriptionUser ? 'failed' : 'regular' })
@@ -438,7 +466,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 32px;
+    margin-top: 16px;
     padding-top: 32px;
     border-top: 2px solid $soft-tone;
     @media screen and (max-width: $breakpoint-xs-max) {
@@ -517,20 +545,21 @@ export default {
     -webkit-appearance: none;
     margin: 0;
   }
-  &__validation-msg{
-    position: absolute;
-    left: 0;
-    right: 0;
-    font-size: 13px;
-    line-height: 16px;
-    color: $dark-pink;
-    font-weight: bold;
-    text-transform: unset;
-    font-family: "Roboto", sans-serif;
-    top: -25px;
-    text-align: right;
-    @media screen and (max-width: $breakpoint-xs-max) {
-      top: 45px;
+  &-result {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+    min-height: 20px;
+
+    &__spinner {}
+
+    &__text {
+      font-size: 13px;
+      line-height: 16px;
+      color: $dark-pink;
+      font-weight: bold;
+      text-transform: unset;
     }
   }
   &--success{

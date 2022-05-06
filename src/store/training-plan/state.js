@@ -7,10 +7,10 @@ export default {
   timeSectionsByDay: [],
   createdAt: null,
   updatedAt: null,
-
   selectedRoutine: {
     position: null,
     dayNumber: null,
     startHour: null
-  }
+  },
+  userFriendGroupEvents: []
 }

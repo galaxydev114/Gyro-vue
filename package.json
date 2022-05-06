@@ -1,12 +1,12 @@
 {
   "name": "gyro",
-  "version": "0.1.223",
+  "version": "0.1.239",
   "description": "Train like a pro",
   "productName": "gyro",
   "author": "Gal Saada <gal@novos.gg>",
   "private": true,
   "scripts": {
-    "dev": "env QENV=development quasar dev",
+    "dev": "cross-env QENV=development quasar dev",
     "dev-pwa": "env QENV=development quasar dev -m pwa",
     "test-dev": "env QENV=test quasar dev",
     "staging-dev": "env QENV=staging quasar dev",
@@ -39,7 +39,7 @@
     "chart.js": "^3.6.0",
     "chartjs-plugin-crosshair": "^1.2.0",
     "core-js": "^3.6.5",
-    "dayjs": "^1.9.1",
+    "dayjs": "^1.10.8",
     "drag-drop-touch": "^1.3.1",
     "fireworks-js": "git+https://github.com/gsaada/fireworks-js.git",
     "hls.js": "^1.0.3",

@@ -112,6 +112,18 @@
           <router-link :to="{ name: 'AdminPlatformNews' }">Create</router-link>
           <router-link :to="{ name: 'AdminPlatformNewsList' }">List</router-link>
         </div>
+
+        <div class="admin-nav__section" v-if="isAdmin">
+          <div class="admin-nav__section-header">Pretend zone</div>
+          <router-link :to="{ name: 'AdminPretendUser' }">User</router-link>
+        </div>
+
+        <div class="admin-nav__section" v-if="isAdmin">
+          <div class="admin-nav__section-header">Friends' Groups</div>
+          <router-link :to="{ name: 'AdminFriendGroups' }">List</router-link>
+          <router-link :to="{ name: 'AdminUserFriendGroupApplications' }">Applications</router-link>
+        </div>
+
       </div>
     </div>
 

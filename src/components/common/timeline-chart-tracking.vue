@@ -60,6 +60,7 @@ export default {
         const key = chart.yAxisID
         const valuePosition = findIndex(maxArr, { id: index })
         scales[key] = {
+          reverse: chart.isScoreInversed,
           display: true,
           beginAtZero: true,
           grace: valuePosition === -1 ? 0 : maxArr[valuePosition].max * valuePosition,
@@ -185,6 +186,7 @@ export default {
           return {
             label: el.title,
             data: el.values,
+            isScoreTime: el.isScoreTime,
             borderColor: el.color,
             borderWidth: el.borderWidth || 2,
             fill: {

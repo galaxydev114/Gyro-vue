@@ -1,6 +1,6 @@
 export default {
-  title: 'Chapter 3',
-  benefitAfterUpgrade: 'New chapter 3 content Everyday!',
-  tag: 'chapter 3',
+  title: 'Season 2',
+  benefitAfterUpgrade: 'New season 2 content Everyday!',
+  tag: 'season 2',
   pathToGenerateTp: '/training-plan?generate=true'
 }
